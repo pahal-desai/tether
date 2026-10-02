@@ -2,7 +2,7 @@ export default {
     async fetch(incomingrequest, env) {
         const corsheaders = {
             'access-control-allow-origin': '*',
-            'access-control-allow-methods': 'POST, OPTIONS',
+            'access-control-allow-methods': 'POST, GET, OPTIONS',
             'access-control-allow-headers': 'content-type'
         };
 
@@ -12,6 +12,14 @@ export default {
 
         const requesturl = new URL(incomingrequest.url);
         const urlpath = requesturl.pathname;
+        const supabaseurl = env.SUPABASE_URL;
+        const supabasekey = env.SUPABASE_ANON_KEY;
+
+        if (urlpath.endsWith('/google')) {
+            const redirectto = requesturl.searchParams.get('redirectto');
+            const authurl = supabaseurl + '/auth/v1/authorize?provider=google&redirect_to=' + encodeURIComponent(redirectto);
+            return Response.redirect(authurl, 302);
+        }
 
         if (incomingrequest.method !== 'POST') {
             return new Response(JSON.stringify({ error: 'method not allowed' }), {
@@ -19,9 +27,6 @@ export default {
                 headers: { ...corsheaders, 'content-type': 'application/json' }
             });
         }
-
-        const supabaseurl = env.SUPABASE_URL;
-        const supabasekey = env.SUPABASE_ANON_KEY;
 
         const requestbody = await incomingrequest.json();
 

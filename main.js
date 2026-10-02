@@ -4,6 +4,16 @@ const authform = document.querySelector('form');
 const pageheading = document.querySelector('h3');
 
 if (authform && pageheading) {
+    const googlebutton = authform.querySelector('button[type="button"]');
+    if (googlebutton) {
+        googlebutton.addEventListener('click', function () {
+            const currentpath = window.location.href;
+            const baseurl = currentpath.substring(0, currentpath.lastIndexOf('/') + 1);
+            const targeturl = baseurl + 'site.html';
+            window.location.href = apiurl + '/google?redirectto=' + encodeURIComponent(targeturl);
+        });
+    }
+
     authform.addEventListener('submit', async function (formevent) {
         formevent.preventDefault();
         const headingtext = pageheading.innerText.toLowerCase();
