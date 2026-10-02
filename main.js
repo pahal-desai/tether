@@ -21,7 +21,9 @@ if (authform && pageheading) {
                 return;
             }
 
-            const redirecturl = window.location.origin + '/success.html';
+            const currentpath = window.location.href;
+            const baseurl = currentpath.substring(0, currentpath.lastIndexOf('/') + 1);
+            const redirecturl = baseurl + 'success.html';
 
             const fetchresponse = await fetch(apiurl + '/signup', {
                 method: 'POST',
