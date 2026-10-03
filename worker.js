@@ -1,3 +1,5 @@
+//this code is not used here. it's deployed on a clouldflare worker
+
 export default {
     async fetch(incomingrequest, env) {
         const corsheaders = {

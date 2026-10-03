@@ -31,10 +31,6 @@ if (authform && pageheading) {
                 return;
             }
 
-            const currentpath = window.location.href;
-            const baseurl = currentpath.substring(0, currentpath.lastIndexOf('/') + 1);
-            const redirecturl = baseurl + 'success.html';
-
             const fetchresponse = await fetch(apiurl + '/signup', {
                 method: 'POST',
                 headers: {
@@ -44,8 +40,7 @@ if (authform && pageheading) {
                     firstname: firstname,
                     lastname: lastname,
                     email: useremail,
-                    password: userpassword,
-                    redirectto: redirecturl
+                    password: userpassword
                 })
             });
 
