@@ -4,6 +4,21 @@
     <link rel="icon" type="image/x-icon" href="assets/favicon.ico ">
     <title>Tether</title>
     <link rel="stylesheet" href="signup.css">
+    <script>
+        const currenthash = window.location.hash;
+        if (currenthash && currenthash.includes('access_token=')) {
+            const hashparams = new URLSearchParams(currenthash.substring(1));
+            const accesstoken = hashparams.get('access_token');
+            if (accesstoken) {
+                localStorage.setItem('accesstoken', accesstoken);
+            }
+        }
+
+        const savedtoken = localStorage.getItem('accesstoken');
+        if (!savedtoken) {
+            window.location.href = 'index.html';
+        }
+    </script>
 </head>
 
 <body>
@@ -17,15 +32,6 @@
         <a href="login.html">Sign Out</a>
     </div>
     <script>
-        const currenthash = window.location.hash;
-        if (currenthash && currenthash.includes('access_token=')) {
-            const hashparams = new URLSearchParams(currenthash.substring(1));
-            const accesstoken = hashparams.get('access_token');
-            if (accesstoken) {
-                localStorage.setItem('accesstoken', accesstoken);
-            }
-        }
-
         const signoutlink = document.querySelector('a[href="login.html"]');
         if (signoutlink) {
             signoutlink.addEventListener('click', function () {
