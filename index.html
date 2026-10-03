@@ -1,6 +1,12 @@
 <html>
 
 <head>
+    <script>
+        const savedtoken = localStorage.getItem('accesstoken');
+        if (savedtoken) {
+            window.location.href = 'site.html';
+        }
+    </script>
     <title>Tether</title>
     <link rel="icon" type="image/x-icon" href="assets/favicon.ico ">
     <style>

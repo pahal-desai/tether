@@ -49,6 +49,9 @@ if (authform && pageheading) {
             if (!fetchresponse.ok) {
                 alert(responsedata.error || 'sign up failed');
             } else {
+                if (responsedata.access_token) {
+                    localStorage.setItem('accesstoken', responsedata.access_token);
+                }
                 window.location.href = 'site.html';
             }
         } else {
@@ -72,6 +75,9 @@ if (authform && pageheading) {
             if (!fetchresponse.ok) {
                 alert(responsedata.error || 'login failed');
             } else {
+                if (responsedata.access_token) {
+                    localStorage.setItem('accesstoken', responsedata.access_token);
+                }
                 window.location.href = 'site.html';
             }
         }
