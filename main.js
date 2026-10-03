@@ -54,7 +54,7 @@ if (authform && pageheading) {
             if (!fetchresponse.ok) {
                 alert(responsedata.error || 'sign up failed');
             } else {
-                alert('sign up successful check your email');
+                window.location.href = 'site.html';
             }
         } else {
             const forminputs = authform.querySelectorAll('input');
