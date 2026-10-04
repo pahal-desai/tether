@@ -4,7 +4,7 @@ const authform = document.querySelector('form');
 const pageheading = document.querySelector('h3');
 
 if (authform && pageheading) {
-    const googlebutton = authform.querySelector('button[type="button"]');
+    const googlebutton = authform.querySelector('button[type="button"]:not(#github)');
     if (googlebutton) {
         googlebutton.addEventListener('click', function () {
             const currentpath = window.location.href;
@@ -13,18 +13,16 @@ if (authform && pageheading) {
             window.location.href = apiurl + '/google?redirectto=' + encodeURIComponent(targeturl);
         });
     }
-    document.getElementById('github').addEventListener('click', async () => {
-        const { error } = await supabase.auth.signInWithOAuth({
-            provider: 'github',
-            options: {
-                redirectTo: window.location.origin
-            }
-        });
 
-        if (error) {
-            console.error('Error signing in with GitHub:', error.message);
-        }
-    });
+    const githubbutton = authform.querySelector('#github');
+    if (githubbutton) {
+        githubbutton.addEventListener('click', function () {
+            const currentpath = window.location.href;
+            const baseurl = currentpath.substring(0, currentpath.lastIndexOf('/') + 1);
+            const targeturl = baseurl + 'site.html';
+            window.location.href = apiurl + '/github?redirectto=' + encodeURIComponent(targeturl);
+        });
+    }
 
     authform.addEventListener('submit', async function (formevent) {
         formevent.preventDefault();

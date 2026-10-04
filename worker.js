@@ -23,6 +23,12 @@ export default {
             return Response.redirect(authurl, 302);
         }
 
+        if (urlpath.endsWith('/github')) {
+            const redirectto = requesturl.searchParams.get('redirectto');
+            const authurl = supabaseurl + '/auth/v1/authorize?provider=github&redirect_to=' + encodeURIComponent(redirectto);
+            return Response.redirect(authurl, 302);
+        }
+
         if (incomingrequest.method !== 'POST') {
             return new Response(JSON.stringify({ error: 'method not allowed' }), {
                 status: 405,
