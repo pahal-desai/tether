@@ -18,6 +18,7 @@
             if (accesstoken) {
                 localStorage.setItem('accesstoken', accesstoken);
             }
+            window.history.replaceState(null, '', window.location.pathname);
         }
 
         const savedtoken = localStorage.getItem('accesstoken');
