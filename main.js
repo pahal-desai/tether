@@ -7,6 +7,7 @@ if (authform && pageheading) {
     const googlebutton = authform.querySelector('button[type="button"]:not(#github)');
     if (googlebutton) {
         googlebutton.addEventListener('click', function () {
+            sessionStorage.setItem('authpending', 'true');
             const currentpath = window.location.href;
             const baseurl = currentpath.substring(0, currentpath.lastIndexOf('/') + 1);
             const targeturl = baseurl + 'site.html';
@@ -17,6 +18,7 @@ if (authform && pageheading) {
     const githubbutton = authform.querySelector('#github');
     if (githubbutton) {
         githubbutton.addEventListener('click', function () {
+            sessionStorage.setItem('authpending', 'true');
             const currentpath = window.location.href;
             const baseurl = currentpath.substring(0, currentpath.lastIndexOf('/') + 1);
             const targeturl = baseurl + 'site.html';
