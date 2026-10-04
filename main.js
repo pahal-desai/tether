@@ -13,6 +13,18 @@ if (authform && pageheading) {
             window.location.href = apiurl + '/google?redirectto=' + encodeURIComponent(targeturl);
         });
     }
+    document.getElementById('github').addEventListener('click', async () => {
+        const { error } = await supabase.auth.signInWithOAuth({
+            provider: 'github',
+            options: {
+                redirectTo: window.location.origin
+            }
+        });
+
+        if (error) {
+            console.error('Error signing in with GitHub:', error.message);
+        }
+    });
 
     authform.addEventListener('submit', async function (formevent) {
         formevent.preventDefault();
