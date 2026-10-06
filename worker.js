@@ -5,7 +5,7 @@ export default {
         const corsheaders = {
             'access-control-allow-origin': '*',
             'access-control-allow-methods': 'POST, GET, OPTIONS',
-            'access-control-allow-headers': 'content-type'
+            'access-control-allow-headers': 'content-type, authorization'
         };
 
         if (incomingrequest.method === 'OPTIONS') {
@@ -27,6 +27,57 @@ export default {
             const redirectto = requesturl.searchParams.get('redirectto');
             const authurl = supabaseurl + '/auth/v1/authorize?provider=github&redirect_to=' + encodeURIComponent(redirectto);
             return Response.redirect(authurl, 302);
+        }
+
+        if (urlpath.endsWith('/posts')) {
+            if (incomingrequest.method === 'GET') {
+                const supabaseresponse = await fetch(supabaseurl + '/rest/v1/posts?select=*&order=created_at.desc', {
+                    headers: {
+                        'apikey': supabasekey,
+                        'authorization': 'Bearer ' + supabasekey
+                    }
+                });
+
+                const responsedata = await supabaseresponse.json();
+
+                return new Response(JSON.stringify(responsedata), {
+                    status: supabaseresponse.status,
+                    headers: { ...corsheaders, 'content-type': 'application/json' }
+                });
+            }
+
+            if (incomingrequest.method === 'POST') {
+                const requestbody = await incomingrequest.json();
+                const postcontent = requestbody.content;
+                const userauth = incomingrequest.headers.get('authorization') || ('Bearer ' + supabasekey);
+
+                const supabaseresponse = await fetch(supabaseurl + '/rest/v1/posts', {
+                    method: 'POST',
+                    headers: {
+                        'apikey': supabasekey,
+                        'authorization': userauth,
+                        'content-type': 'application/json',
+                        'prefer': 'return=representation'
+                    },
+                    body: JSON.stringify({
+                        content: postcontent
+                    })
+                });
+
+                const responsedata = await supabaseresponse.json();
+
+                if (!supabaseresponse.ok) {
+                    return new Response(JSON.stringify({ error: responsedata.message || 'failed to create post' }), {
+                        status: supabaseresponse.status,
+                        headers: { ...corsheaders, 'content-type': 'application/json' }
+                    });
+                }
+
+                return new Response(JSON.stringify(responsedata), {
+                    status: 201,
+                    headers: { ...corsheaders, 'content-type': 'application/json' }
+                });
+            }
         }
 
         if (incomingrequest.method !== 'POST') {
