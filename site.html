@@ -1,38 +1,36 @@
 <html>
 
 <head>
-    <link rel="icon" type="image/x-icon" href="assets/favicon.ico ">
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
     <title>Tether</title>
-    <link rel="stylesheet" href="signup.css">
     <script>
         const isauthpending = sessionStorage.getItem('authpending');
         sessionStorage.removeItem('authpending');
-
         const currenthash = window.location.hash;
-        if (currenthash && currenthash.includes('error=')) {
+        if (currenthash) {
             const hashparams = new URLSearchParams(currenthash.substring(1));
             const errordesc = hashparams.get('error_description') || hashparams.get('error');
-            alert(errordesc);
-            window.history.replaceState(null, '', window.location.pathname);
-        }
-
-        if (currenthash && currenthash.includes('access_token=') && isauthpending) {
-            const hashparams = new URLSearchParams(currenthash.substring(1));
+            if (errordesc) alert(errordesc);
             const accesstoken = hashparams.get('access_token');
-            if (accesstoken) {
-                localStorage.setItem('accesstoken', accesstoken);
-            }
-            window.history.replaceState(null, '', window.location.pathname);
-        } else if (currenthash && currenthash.includes('access_token=')) {
+            if (accesstoken && isauthpending) localStorage.setItem('accesstoken', accesstoken);
             window.history.replaceState(null, '', window.location.pathname);
         }
-
-        const savedtoken = localStorage.getItem('accesstoken');
-        if (!savedtoken) {
+        if (!localStorage.getItem('accesstoken')) {
             window.location.href = 'index.html';
         }
     </script>
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body,
+        button,
+        textarea,
+        input {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
         body {
             margin: 0;
             display: flex;
@@ -48,7 +46,6 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            box-sizing: border-box;
             position: fixed;
             top: 0;
             left: 0;
@@ -78,7 +75,6 @@
             font-weight: bold;
             font-size: 15px;
             width: 100%;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
             margin-bottom: 8px;
         }
 
@@ -91,7 +87,6 @@
             outline: none;
             color: #333;
             font-size: 15px;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
             text-align: left;
             width: 100%;
             transition: background-color 0.2s ease, color 0.2s ease;
@@ -117,29 +112,27 @@
             min-width: 0;
         }
 
-        .accountavatar {
-            width: 32px;
-            height: 32px;
+        .accountavatar,
+        .createbaravatar,
+        .postavatar {
             border-radius: 50%;
             background-color: #5B4CF6;
             color: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 13px;
             font-weight: bold;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
             flex-shrink: 0;
         }
 
-        .accountmeta {
-            min-width: 0;
-            display: flex;
-            flex-direction: column;
+        .accountavatar,
+        .createbaravatar {
+            width: 32px;
+            height: 32px;
+            font-size: 13px;
         }
 
         .accountname {
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
             font-size: 13px;
             font-weight: 600;
             color: #333;
@@ -158,7 +151,6 @@
             font-size: 12px;
             font-weight: 600;
             outline: none;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
             transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
             white-space: nowrap;
         }
@@ -177,7 +169,6 @@
             align-items: center;
             padding: 30px 20px;
             min-height: 100vh;
-            box-sizing: border-box;
         }
 
         .feedwrapper {
@@ -206,21 +197,6 @@
             box-shadow: 0 2px 8px rgba(91, 76, 246, 0.08);
         }
 
-        .createbaravatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background-color: #5B4CF6;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 13px;
-            font-weight: bold;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-            flex-shrink: 0;
-        }
-
         .createbarinput {
             flex: 1;
             background-color: #f8fafc;
@@ -229,7 +205,6 @@
             padding: 8px 14px;
             font-size: 14px;
             color: #718096;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
             user-select: none;
         }
 
@@ -246,8 +221,6 @@
             border-radius: 12px;
             padding: 18px 22px;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-            color: #2d3748;
             display: flex;
             flex-direction: column;
             gap: 10px;
@@ -270,13 +243,6 @@
         .postavatar {
             width: 26px;
             height: 26px;
-            border-radius: 50%;
-            background-color: #5B4CF6;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
             font-size: 11px;
         }
 
@@ -306,7 +272,6 @@
             text-align: center;
             color: #718096;
             font-size: 14px;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
         }
 
         .modaloverlay {
@@ -328,8 +293,6 @@
             padding: 24px;
             width: 400px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-            box-sizing: border-box;
         }
 
         .modalheader {
@@ -365,11 +328,9 @@
             border: 1px solid #ccc;
             border-radius: 8px;
             padding: 10px;
-            font-family: inherit;
             font-size: 14px;
             resize: none;
             outline: none;
-            box-sizing: border-box;
             margin-bottom: 15px;
         }
 
@@ -404,9 +365,7 @@
         <div class="sidebaraccount">
             <div class="accountinfo">
                 <div class="accountavatar">U</div>
-                <div class="accountmeta">
-                    <span class="accountname">Account</span>
-                </div>
+                <div class="accountname">Account</div>
             </div>
             <button class="signoutbutton" id="signoutbutton">Sign Out</button>
         </div>
@@ -452,37 +411,11 @@
                 }
                 for (let i = 0; i < postslist.length; i++) {
                     const singlepost = postslist[i];
+                    const datestring = singlepost.created_at ? '• ' + new Date(singlepost.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '';
                     const postcard = document.createElement('div');
                     postcard.className = 'postcard';
-
-                    const postmeta = document.createElement('div');
-                    postmeta.className = 'postmeta';
-
-                    const postavatar = document.createElement('div');
-                    postavatar.className = 'postavatar';
-                    postavatar.innerText = 'T';
-
-                    const postauthor = document.createElement('span');
-                    postauthor.className = 'postauthor';
-                    postauthor.innerText = 'Tether Member';
-
-                    postmeta.appendChild(postavatar);
-                    postmeta.appendChild(postauthor);
-
-                    if (singlepost.created_at) {
-                        const dateobject = new Date(singlepost.created_at);
-                        const postdate = document.createElement('span');
-                        postdate.className = 'postdate';
-                        postdate.innerText = '• ' + dateobject.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-                        postmeta.appendChild(postdate);
-                    }
-
-                    const postbody = document.createElement('div');
-                    postbody.className = 'postbody';
-                    postbody.innerText = singlepost.content;
-
-                    postcard.appendChild(postmeta);
-                    postcard.appendChild(postbody);
+                    postcard.innerHTML = '<div class="postmeta"><div class="postavatar">T</div><span class="postauthor">Tether Member</span><span class="postdate">' + datestring + '</span></div><div class="postbody"></div>';
+                    postcard.querySelector('.postbody').textContent = singlepost.content;
                     feedcontainer.appendChild(postcard);
                 }
             }
@@ -495,39 +428,19 @@
         const closemodalbutton = document.querySelector('#closemodal');
         const publishbutton = document.querySelector('#publishpost');
 
-        if (openmodalbutton && modaloverlay) {
-            openmodalbutton.addEventListener('click', function () {
-                modaloverlay.style.display = 'flex';
-            });
-        }
+        const openmodal = () => { modaloverlay.style.display = 'flex'; };
+        const closemodal = () => { modaloverlay.style.display = 'none'; };
 
-        if (createbar && modaloverlay) {
-            createbar.addEventListener('click', function () {
-                modaloverlay.style.display = 'flex';
-            });
-        }
-
-        if (closemodalbutton && modaloverlay) {
-            closemodalbutton.addEventListener('click', function () {
-                modaloverlay.style.display = 'none';
-            });
-        }
-
-        if (modaloverlay) {
-            modaloverlay.addEventListener('click', function (overlayevent) {
-                if (overlayevent.target === modaloverlay) {
-                    modaloverlay.style.display = 'none';
-                }
-            });
-        }
+        if (openmodalbutton) openmodalbutton.onclick = openmodal;
+        if (createbar) createbar.onclick = openmodal;
+        if (closemodalbutton) closemodalbutton.onclick = closemodal;
+        if (modaloverlay) modaloverlay.onclick = (e) => { if (e.target === modaloverlay) closemodal(); };
 
         if (publishbutton && modaloverlay) {
-            publishbutton.addEventListener('click', async function () {
+            publishbutton.onclick = async () => {
                 const textarea = modaloverlay.querySelector('textarea');
                 const posttext = textarea ? textarea.value.trim() : '';
-                if (!posttext) {
-                    return;
-                }
+                if (!posttext) return;
                 const currenttoken = localStorage.getItem('accesstoken');
                 const postresponse = await fetch(apiurl + '/posts', {
                     method: 'POST',
@@ -535,13 +448,11 @@
                         'content-type': 'application/json',
                         'authorization': 'Bearer ' + currenttoken
                     },
-                    body: JSON.stringify({
-                        content: posttext
-                    })
+                    body: JSON.stringify({ content: posttext })
                 });
                 if (postresponse.ok) {
                     textarea.value = '';
-                    modaloverlay.style.display = 'none';
+                    closemodal();
                     loadposts();
                 } else {
                     const posterror = await postresponse.json();
@@ -553,15 +464,15 @@
                     }
                     alert(posterror.error || 'failed to create post');
                 }
-            });
+            };
         }
 
         const signoutbutton = document.querySelector('#signoutbutton');
         if (signoutbutton) {
-            signoutbutton.addEventListener('click', function () {
+            signoutbutton.onclick = () => {
                 localStorage.removeItem('accesstoken');
                 window.location.href = 'login.html';
-            });
+            };
         }
     </script>
 </body>
