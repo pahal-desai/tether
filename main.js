@@ -32,11 +32,15 @@ if (authform && pageheading) {
 
         if (headingtext.includes('up')) {
             const forminputs = authform.querySelectorAll('input');
-            const firstname = forminputs[0].value;
-            const lastname = forminputs[1].value;
-            const useremail = forminputs[2].value;
-            const userpassword = forminputs[3].value;
-            const confirmpassword = forminputs[4].value;
+            const username = forminputs[0].value.trim();
+            const useremail = forminputs[1].value.trim();
+            const userpassword = forminputs[2].value;
+            const confirmpassword = forminputs[3].value;
+
+            if (!username) {
+                alert('please enter a username');
+                return;
+            }
 
             if (userpassword !== confirmpassword) {
                 alert('passwords do not match');
@@ -49,8 +53,7 @@ if (authform && pageheading) {
                     'content-type': 'application/json'
                 },
                 body: JSON.stringify({
-                    firstname: firstname,
-                    lastname: lastname,
+                    username: username,
                     email: useremail,
                     password: userpassword
                 })
@@ -64,11 +67,12 @@ if (authform && pageheading) {
                 if (responsedata.access_token) {
                     localStorage.setItem('accesstoken', responsedata.access_token);
                 }
+                localStorage.setItem('username', username);
                 window.location.href = 'site.html';
             }
         } else {
             const forminputs = authform.querySelectorAll('input');
-            const useremail = forminputs[0].value;
+            const useremail = forminputs[0].value.trim();
             const userpassword = forminputs[1].value;
 
             const fetchresponse = await fetch(apiurl + '/login', {
@@ -89,6 +93,10 @@ if (authform && pageheading) {
             } else {
                 if (responsedata.access_token) {
                     localStorage.setItem('accesstoken', responsedata.access_token);
+                }
+                const returnedusername = responsedata.user && responsedata.user.user_metadata ? responsedata.user.user_metadata.username : '';
+                if (returnedusername) {
+                    localStorage.setItem('username', returnedusername);
                 }
                 window.location.href = 'site.html';
             }

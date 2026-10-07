@@ -1,5 +1,3 @@
-//this code is not used here. it's deployed on a clouldflare worker
-
 export default {
     async fetch(incomingrequest, env) {
         const corsheaders = {
@@ -49,9 +47,27 @@ export default {
             if (incomingrequest.method === 'POST') {
                 const requestbody = await incomingrequest.json();
                 const postcontent = requestbody.content;
+                let postusername = requestbody.username || '';
                 const userauth = incomingrequest.headers.get('authorization') || ('Bearer ' + supabasekey);
 
-                const supabaseresponse = await fetch(supabaseurl + '/rest/v1/posts', {
+                if (!postusername && userauth.includes('Bearer ')) {
+                    try {
+                        const tokenparts = userauth.replace('Bearer ', '').trim().split('.');
+                        if (tokenparts.length === 3) {
+                            const tokendata = JSON.parse(atob(tokenparts[1]));
+                            postusername = tokendata.user_metadata?.username || tokendata.user_metadata?.preferred_username || '';
+                        }
+                    } catch (tokenparseerror) { }
+                }
+
+                const postpayload = {
+                    content: postcontent
+                };
+                if (postusername) {
+                    postpayload.username = postusername;
+                }
+
+                let supabaseresponse = await fetch(supabaseurl + '/rest/v1/posts', {
                     method: 'POST',
                     headers: {
                         'apikey': supabasekey,
@@ -59,12 +75,26 @@ export default {
                         'content-type': 'application/json',
                         'prefer': 'return=representation'
                     },
-                    body: JSON.stringify({
-                        content: postcontent
-                    })
+                    body: JSON.stringify(postpayload)
                 });
 
-                const responsedata = await supabaseresponse.json();
+                let responsedata = await supabaseresponse.json();
+
+                if (!supabaseresponse.ok && postusername) {
+                    supabaseresponse = await fetch(supabaseurl + '/rest/v1/posts', {
+                        method: 'POST',
+                        headers: {
+                            'apikey': supabasekey,
+                            'authorization': userauth,
+                            'content-type': 'application/json',
+                            'prefer': 'return=representation'
+                        },
+                        body: JSON.stringify({
+                            content: postcontent
+                        })
+                    });
+                    responsedata = await supabaseresponse.json();
+                }
 
                 if (!supabaseresponse.ok) {
                     return new Response(JSON.stringify({ error: responsedata.message || 'failed to create post' }), {
@@ -89,11 +119,43 @@ export default {
 
         const requestbody = await incomingrequest.json();
 
+        if (urlpath.endsWith('/username')) {
+            const userauth = incomingrequest.headers.get('authorization') || '';
+            const username = requestbody.username || '';
+
+            const supabaseresponse = await fetch(supabaseurl + '/auth/v1/user', {
+                method: 'PUT',
+                headers: {
+                    'apikey': supabasekey,
+                    'authorization': userauth,
+                    'content-type': 'application/json'
+                },
+                body: JSON.stringify({
+                    data: {
+                        username: username
+                    }
+                })
+            });
+
+            const responsedata = await supabaseresponse.json();
+
+            if (!supabaseresponse.ok) {
+                return new Response(JSON.stringify({ error: responsedata.msg || responsedata.message || 'failed to update username' }), {
+                    status: supabaseresponse.status,
+                    headers: { ...corsheaders, 'content-type': 'application/json' }
+                });
+            }
+
+            return new Response(JSON.stringify(responsedata), {
+                status: 200,
+                headers: { ...corsheaders, 'content-type': 'application/json' }
+            });
+        }
+
         if (urlpath.endsWith('/signup')) {
             const useremail = requestbody.email;
             const userpassword = requestbody.password;
-            const firstname = requestbody.firstname;
-            const lastname = requestbody.lastname;
+            const username = requestbody.username || '';
             const redirectto = requestbody.redirectto;
 
             let signuppath = supabaseurl + '/auth/v1/signup';
@@ -112,8 +174,7 @@ export default {
                     email: useremail,
                     password: userpassword,
                     data: {
-                        firstname: firstname,
-                        lastname: lastname
+                        username: username
                     }
                 })
             });

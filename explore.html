@@ -315,10 +315,19 @@
             });
         }
 
+        const storedusername = localStorage.getItem('username');
+        if (storedusername) {
+            const accountavatar = document.querySelector('.accountavatar');
+            const accountname = document.querySelector('.accountname');
+            if (accountavatar) accountavatar.textContent = storedusername.charAt(0).toUpperCase();
+            if (accountname) accountname.textContent = storedusername;
+        }
+
         const signoutbutton = document.querySelector('#signoutbutton');
         if (signoutbutton) {
             signoutbutton.addEventListener('click', function () {
                 localStorage.removeItem('accesstoken');
+                localStorage.removeItem('username');
                 window.location.href = 'login.html';
             });
         }

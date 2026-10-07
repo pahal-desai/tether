@@ -338,6 +338,20 @@
             border-color: #5B4CF6;
         }
 
+        .usernameinput {
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 14px;
+            outline: none;
+            margin-bottom: 15px;
+        }
+
+        .usernameinput:focus {
+            border-color: #5B4CF6;
+        }
+
         .publishbutton {
             background-color: #5B4CF6;
             color: white;
@@ -364,8 +378,8 @@
         </div>
         <div class="sidebaraccount">
             <div class="accountinfo">
-                <div class="accountavatar">U</div>
-                <div class="accountname">Account</div>
+                <div class="accountavatar" id="accountavatar">U</div>
+                <div class="accountname" id="accountname">Account</div>
             </div>
             <button class="signoutbutton" id="signoutbutton">Sign Out</button>
         </div>
@@ -374,7 +388,7 @@
     <div class="maincontent">
         <div class="feedwrapper">
             <div class="createbar" id="createbar">
-                <div class="createbaravatar">U</div>
+                <div class="createbaravatar" id="createbaravatar">U</div>
                 <div class="createbarinput">Write a post...</div>
             </div>
             <div class="postsfeed" id="postsfeed"></div>
@@ -392,8 +406,80 @@
         </div>
     </div>
 
+    <div class="modaloverlay" id="usernamemodal">
+        <div class="modalcontent">
+            <div class="modalheader">
+                <h3>Choose Username</h3>
+            </div>
+            <p style="font-size: 14px; color: #555; margin: 0 0 15px 0;">Please choose a username for your Tether account.</p>
+            <input type="text" class="usernameinput" id="usernameinput" placeholder="Username">
+            <button class="publishbutton" id="saveusernamebutton">Save</button>
+        </div>
+    </div>
+
     <script>
         const apiurl = 'https://little-firefly-b421.desaipahal64.workers.dev/api';
+
+        function getusernamefromtoken(tokenstring) {
+            try {
+                const payloadpart = tokenstring.split('.')[1];
+                const decodedpayload = JSON.parse(atob(payloadpart));
+                return decodedpayload.user_metadata?.username || decodedpayload.user_metadata?.preferred_username || '';
+            } catch (e) {
+                return '';
+            }
+        }
+
+        const savedtoken = localStorage.getItem('accesstoken');
+        let currentusername = localStorage.getItem('username') || '';
+        if (!currentusername && savedtoken) {
+            currentusername = getusernamefromtoken(savedtoken);
+            if (currentusername) {
+                localStorage.setItem('username', currentusername);
+            }
+        }
+
+        function updateaccountdisplay() {
+            const accountavatar = document.querySelector('#accountavatar');
+            const accountname = document.querySelector('#accountname');
+            const createbaravatar = document.querySelector('#createbaravatar');
+            const displayname = currentusername || 'account';
+            const displayinitial = displayname.charAt(0).toUpperCase();
+            if (accountavatar) accountavatar.textContent = displayinitial;
+            if (accountname) accountname.textContent = displayname;
+            if (createbaravatar) createbaravatar.textContent = displayinitial;
+        }
+        updateaccountdisplay();
+
+        const usernamemodal = document.querySelector('#usernamemodal');
+        const usernameinput = document.querySelector('#usernameinput');
+        const saveusernamebutton = document.querySelector('#saveusernamebutton');
+
+        if (!currentusername && usernamemodal) {
+            usernamemodal.style.display = 'flex';
+        }
+
+        if (saveusernamebutton && usernameinput && usernamemodal) {
+            saveusernamebutton.onclick = async () => {
+                const enteredusername = usernameinput.value.trim();
+                if (!enteredusername) return;
+                currentusername = enteredusername;
+                localStorage.setItem('username', currentusername);
+                updateaccountdisplay();
+                usernamemodal.style.display = 'none';
+                const currenttoken = localStorage.getItem('accesstoken');
+                if (currenttoken) {
+                    await fetch(apiurl + '/username', {
+                        method: 'POST',
+                        headers: {
+                            'content-type': 'application/json',
+                            'authorization': 'Bearer ' + currenttoken
+                        },
+                        body: JSON.stringify({ username: currentusername })
+                    });
+                }
+            };
+        }
 
         async function loadposts() {
             const feedcontainer = document.querySelector('#postsfeed');
@@ -411,10 +497,12 @@
                 }
                 for (let i = 0; i < postslist.length; i++) {
                     const singlepost = postslist[i];
+                    const postauthorname = singlepost.username || 'tether user';
+                    const authorinitial = postauthorname.charAt(0).toUpperCase();
                     const datestring = singlepost.created_at ? '• ' + new Date(singlepost.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '';
                     const postcard = document.createElement('div');
                     postcard.className = 'postcard';
-                    postcard.innerHTML = '<div class="postmeta"><div class="postavatar">T</div><span class="postauthor">Tether Member</span><span class="postdate">' + datestring + '</span></div><div class="postbody"></div>';
+                    postcard.innerHTML = '<div class="postmeta"><div class="postavatar">' + authorinitial + '</div><span class="postauthor">' + postauthorname + '</span><span class="postdate">' + datestring + '</span></div><div class="postbody"></div>';
                     postcard.querySelector('.postbody').textContent = singlepost.content;
                     feedcontainer.appendChild(postcard);
                 }
@@ -448,7 +536,10 @@
                         'content-type': 'application/json',
                         'authorization': 'Bearer ' + currenttoken
                     },
-                    body: JSON.stringify({ content: posttext })
+                    body: JSON.stringify({
+                        content: posttext,
+                        username: currentusername || localStorage.getItem('username') || 'tether user'
+                    })
                 });
                 if (postresponse.ok) {
                     textarea.value = '';
@@ -458,6 +549,7 @@
                     const posterror = await postresponse.json();
                     if (posterror.error && posterror.error.toLowerCase().includes('jwt')) {
                         localStorage.removeItem('accesstoken');
+                        localStorage.removeItem('username');
                         alert('session expired. please sign in again.');
                         window.location.href = 'login.html';
                         return;
@@ -471,6 +563,7 @@
         if (signoutbutton) {
             signoutbutton.onclick = () => {
                 localStorage.removeItem('accesstoken');
+                localStorage.removeItem('username');
                 window.location.href = 'login.html';
             };
         }
