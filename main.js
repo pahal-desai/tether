@@ -68,7 +68,9 @@ if (authform && pageheading) {
                     localStorage.setItem('accesstoken', responsedata.access_token);
                 }
                 localStorage.setItem('username', username);
-                window.location.href = 'site.html';
+                const redirecturl = sessionStorage.getItem('redirecturl');
+                sessionStorage.removeItem('redirecturl');
+                window.location.href = redirecturl || 'site.html';
             }
         } else {
             const forminputs = authform.querySelectorAll('input');
@@ -98,7 +100,9 @@ if (authform && pageheading) {
                 if (returnedusername) {
                     localStorage.setItem('username', returnedusername);
                 }
-                window.location.href = 'site.html';
+                const redirecturl = sessionStorage.getItem('redirecturl');
+                sessionStorage.removeItem('redirecturl');
+                window.location.href = redirecturl || 'site.html';
             }
         }
     });

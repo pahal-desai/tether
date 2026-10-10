@@ -337,6 +337,34 @@
             color: #334155;
         }
 
+        .sharebutton {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: transparent;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            padding: 4px 10px;
+            font-size: 12px;
+            color: #64748b;
+            cursor: pointer;
+            outline: none;
+            transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+        }
+
+        .sharebutton:hover {
+            background-color: #f1f5f9;
+            border-color: #cbd5e1;
+            color: #334155;
+        }
+
+        .sharebutton.copied {
+            background-color: #f0fdf4;
+            border-color: #bbf7d0;
+            color: #16a34a;
+            font-weight: 600;
+        }
+
         .commentssection {
             display: none;
             flex-direction: column;
@@ -768,7 +796,7 @@
 
                     const postcard = document.createElement('div');
                     postcard.className = 'postcard';
-                    postcard.innerHTML = '<div class="postmeta"><div class="postauthorinfo"><div class="postavatar">' + authorinitial + '</div><span class="postauthor">' + postauthorname + '</span>' + (canfollow ? '<button class="followbutton' + (isfollowingauthor ? ' following' : '') + '">' + (isfollowingauthor ? 'Following' : '+ Follow') + '</button>' : '') + '<span class="postdate">' + datestring + '</span></div>' + (isauthor ? '<button class="deletepostbutton" title="Delete post">Delete</button>' : '') + '</div><div class="postbody"></div><div class="postcardfooter"><button class="likebutton' + (ispostliked ? ' liked' : '') + '"><svg class="hearticon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg><span class="likecount">' + likescount + '</span></button><button class="commentbutton"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg><span class="commentcount">' + (singlepost.commentscount || 0) + '</span></button></div><div class="commentssection"><div class="commentinputrow"><input type="text" class="commentinput" placeholder="Write a comment..."><button class="commentsubmitbutton">Comment</button></div><div class="commentslist"></div></div>';
+                    postcard.innerHTML = '<div class="postmeta"><div class="postauthorinfo"><div class="postavatar">' + authorinitial + '</div><span class="postauthor">' + postauthorname + '</span>' + (canfollow ? '<button class="followbutton' + (isfollowingauthor ? ' following' : '') + '">' + (isfollowingauthor ? 'Following' : '+ Follow') + '</button>' : '') + '<span class="postdate">' + datestring + '</span></div>' + (isauthor ? '<button class="deletepostbutton" title="Delete post">Delete</button>' : '') + '</div><div class="postbody"></div><div class="postcardfooter"><button class="likebutton' + (ispostliked ? ' liked' : '') + '"><svg class="hearticon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg><span class="likecount">' + likescount + '</span></button><button class="commentbutton"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg><span class="commentcount">' + (singlepost.commentscount || 0) + '</span></button><button class="sharebutton" title="Share post"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg><span class="sharelabel">Share</span></button></div><div class="commentssection"><div class="commentinputrow"><input type="text" class="commentinput" placeholder="Write a comment..."><button class="commentsubmitbutton">Comment</button></div><div class="commentslist"></div></div>';
                     postcard.querySelector('.postbody').textContent = singlepost.content;
 
                     if (canfollow) {
@@ -995,6 +1023,57 @@
                             if (commentresponse.ok) {
                                 commentinput.value = '';
                                 loadpostcomments();
+                            }
+                        };
+                    }
+
+                    const sharebutton = postcard.querySelector('.sharebutton');
+                    if (sharebutton) {
+                        sharebutton.onclick = async () => {
+                            const sharelabel = sharebutton.querySelector('.sharelabel');
+                            const postshareurl = new URL('site.html?post=' + encodeURIComponent(singlepost.id), window.location.href).href;
+                            let wascopied = false;
+
+                            if (navigator.clipboard && navigator.clipboard.writeText) {
+                                try {
+                                    await navigator.clipboard.writeText(postshareurl);
+                                    wascopied = true;
+                                } catch (clipborder) { }
+                            }
+
+                            if (!wascopied) {
+                                try {
+                                    const textareaelement = document.createElement('textarea');
+                                    textareaelement.value = postshareurl;
+                                    textareaelement.setAttribute('readonly', '');
+                                    textareaelement.style.position = 'fixed';
+                                    textareaelement.style.top = '0';
+                                    textareaelement.style.left = '0';
+                                    textareaelement.style.width = '2em';
+                                    textareaelement.style.height = '2em';
+                                    textareaelement.style.padding = '0';
+                                    textareaelement.style.border = 'none';
+                                    textareaelement.style.outline = 'none';
+                                    textareaelement.style.boxShadow = 'none';
+                                    textareaelement.style.background = 'transparent';
+                                    document.body.appendChild(textareaelement);
+                                    textareaelement.focus();
+                                    textareaelement.select();
+                                    textareaelement.setSelectionRange(0, textareaelement.value.length);
+                                    wascopied = document.execCommand('copy');
+                                    document.body.removeChild(textareaelement);
+                                } catch (fallbackerror) { }
+                            }
+
+                            if (wascopied && sharelabel) {
+                                sharebutton.classList.add('copied');
+                                sharelabel.textContent = 'Copied!';
+                                setTimeout(() => {
+                                    sharebutton.classList.remove('copied');
+                                    sharelabel.textContent = 'Share';
+                                }, 2000);
+                            } else if (!wascopied) {
+                                prompt('Copy post link:', postshareurl);
                             }
                         };
                     }
