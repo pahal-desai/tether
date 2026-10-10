@@ -51,13 +51,28 @@ export default {
                     }
                 } catch (likesfetcherror) { }
 
+                let commentslist = [];
+                try {
+                    const commentsresponse = await fetch(supabaseurl + '/rest/v1/comments?select=id,post_id', {
+                        headers: {
+                            'apikey': supabasekey,
+                            'authorization': 'Bearer ' + supabasekey
+                        }
+                    });
+                    if (commentsresponse.ok) {
+                        commentslist = await commentsresponse.json().catch(() => []);
+                    }
+                } catch (commentsfetcherror) { }
+
                 if (Array.isArray(responsedata)) {
                     responsedata = responsedata.map(singlepost => {
                         const postlikes = likeslist.filter(likeitem => likeitem.post_id === singlepost.id);
+                        const postcomments = commentslist.filter(commentitem => commentitem.post_id === singlepost.id);
                         return {
                             ...singlepost,
                             likescount: postlikes.length,
-                            likedusers: postlikes.map(likeitem => likeitem.user_id)
+                            likedusers: postlikes.map(likeitem => likeitem.user_id),
+                            commentscount: postcomments.length
                         };
                     });
                 }
@@ -418,6 +433,184 @@ export default {
                         headers: { ...corsheaders, 'content-type': 'application/json' }
                     });
                 }
+            }
+        }
+
+        if (urlpath.endsWith('/comments')) {
+            if (incomingrequest.method === 'GET') {
+                const requestparams = requesturl.searchParams;
+                const postid = requestparams.get('postid');
+                if (!postid) {
+                    return new Response(JSON.stringify({ error: 'missing post id' }), {
+                        status: 400,
+                        headers: { ...corsheaders, 'content-type': 'application/json' }
+                    });
+                }
+
+                const commentsresponse = await fetch(supabaseurl + '/rest/v1/comments?post_id=eq.' + encodeURIComponent(postid) + '&order=created_at.asc', {
+                    headers: {
+                        'apikey': supabasekey,
+                        'authorization': 'Bearer ' + supabasekey
+                    }
+                });
+
+                const commentsdata = await commentsresponse.json().catch(() => []);
+                return new Response(JSON.stringify(commentsdata), {
+                    status: commentsresponse.status,
+                    headers: { ...corsheaders, 'content-type': 'application/json' }
+                });
+            }
+
+            if (incomingrequest.method === 'POST') {
+                const userauth = incomingrequest.headers.get('authorization') || '';
+                let callerid = '';
+                let callerusername = '';
+
+                if (userauth.includes('Bearer ')) {
+                    try {
+                        const tokenparts = userauth.replace('Bearer ', '').trim().split('.');
+                        if (tokenparts.length === 3) {
+                            const tokendata = JSON.parse(atob(tokenparts[1]));
+                            callerid = tokendata.sub || '';
+                            callerusername = tokendata.user_metadata?.username || tokendata.user_metadata?.preferred_username || '';
+                        }
+                    } catch (tokenparseerror) { }
+                }
+
+                if (!callerid) {
+                    return new Response(JSON.stringify({ error: 'unauthorized' }), {
+                        status: 401,
+                        headers: { ...corsheaders, 'content-type': 'application/json' }
+                    });
+                }
+
+                const requestbody = await incomingrequest.json().catch(() => ({}));
+                const postid = requestbody.postid;
+                const commentcontent = (requestbody.content || '').trim();
+                const parentid = requestbody.parentid || null;
+
+                if (!postid || !commentcontent) {
+                    return new Response(JSON.stringify({ error: 'missing post id or content' }), {
+                        status: 400,
+                        headers: { ...corsheaders, 'content-type': 'application/json' }
+                    });
+                }
+
+                const insertresponse = await fetch(supabaseurl + '/rest/v1/comments', {
+                    method: 'POST',
+                    headers: {
+                        'apikey': supabasekey,
+                        'authorization': 'Bearer ' + supabasekey,
+                        'content-type': 'application/json',
+                        'prefer': 'return=representation'
+                    },
+                    body: JSON.stringify({
+                        post_id: postid,
+                        user_id: callerid,
+                        username: callerusername || 'tether user',
+                        content: commentcontent,
+                        parent_id: parentid
+                    })
+                });
+
+                const insertdata = await insertresponse.json().catch(() => ({}));
+                if (!insertresponse.ok) {
+                    return new Response(JSON.stringify({ error: insertdata.message || 'failed to add comment' }), {
+                        status: insertresponse.status,
+                        headers: { ...corsheaders, 'content-type': 'application/json' }
+                    });
+                }
+
+                return new Response(JSON.stringify(insertdata), {
+                    status: 201,
+                    headers: { ...corsheaders, 'content-type': 'application/json' }
+                });
+            }
+
+            if (incomingrequest.method === 'DELETE') {
+                const requestparams = requesturl.searchParams;
+                let commentid = requestparams.get('id');
+                if (!commentid) {
+                    try {
+                        const requestbody = await incomingrequest.json();
+                        commentid = requestbody.id;
+                    } catch (bodyparseerror) { }
+                }
+
+                if (!commentid) {
+                    return new Response(JSON.stringify({ error: 'missing comment id' }), {
+                        status: 400,
+                        headers: { ...corsheaders, 'content-type': 'application/json' }
+                    });
+                }
+
+                const userauth = incomingrequest.headers.get('authorization') || '';
+                let callerid = '';
+                let callerusername = '';
+
+                if (userauth.includes('Bearer ')) {
+                    try {
+                        const tokenparts = userauth.replace('Bearer ', '').trim().split('.');
+                        if (tokenparts.length === 3) {
+                            const tokendata = JSON.parse(atob(tokenparts[1]));
+                            callerid = tokendata.sub || '';
+                            callerusername = tokendata.user_metadata?.username || tokendata.user_metadata?.preferred_username || '';
+                        }
+                    } catch (tokenparseerror) { }
+                }
+
+                if (!callerid) {
+                    return new Response(JSON.stringify({ error: 'unauthorized' }), {
+                        status: 401,
+                        headers: { ...corsheaders, 'content-type': 'application/json' }
+                    });
+                }
+
+                const commentcheckresponse = await fetch(supabaseurl + '/rest/v1/comments?id=eq.' + encodeURIComponent(commentid), {
+                    headers: {
+                        'apikey': supabasekey,
+                        'authorization': 'Bearer ' + supabasekey
+                    }
+                });
+
+                const commentrecords = await commentcheckresponse.json().catch(() => []);
+                if (!commentcheckresponse.ok || !commentrecords || commentrecords.length === 0) {
+                    return new Response(JSON.stringify({ error: 'comment not found' }), {
+                        status: 404,
+                        headers: { ...corsheaders, 'content-type': 'application/json' }
+                    });
+                }
+
+                const targetcomment = commentrecords[0];
+                const isowner = (callerid && targetcomment.user_id && targetcomment.user_id === callerid) || (callerusername && targetcomment.username && targetcomment.username === callerusername);
+
+                if (!isowner) {
+                    return new Response(JSON.stringify({ error: 'not authorized to delete this comment' }), {
+                        status: 403,
+                        headers: { ...corsheaders, 'content-type': 'application/json' }
+                    });
+                }
+
+                const deleteresponse = await fetch(supabaseurl + '/rest/v1/comments?id=eq.' + encodeURIComponent(commentid), {
+                    method: 'DELETE',
+                    headers: {
+                        'apikey': supabasekey,
+                        'authorization': 'Bearer ' + supabasekey,
+                        'prefer': 'return=representation'
+                    }
+                });
+
+                if (!deleteresponse.ok) {
+                    return new Response(JSON.stringify({ error: 'failed to delete comment' }), {
+                        status: 500,
+                        headers: { ...corsheaders, 'content-type': 'application/json' }
+                    });
+                }
+
+                return new Response(JSON.stringify({ success: true }), {
+                    status: 200,
+                    headers: { ...corsheaders, 'content-type': 'application/json' }
+                });
             }
         }
 

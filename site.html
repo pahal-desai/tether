@@ -344,6 +344,178 @@
             font-weight: 600;
         }
 
+        .commentbutton {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: transparent;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            padding: 4px 10px;
+            font-size: 12px;
+            color: #64748b;
+            cursor: pointer;
+            outline: none;
+            transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+        }
+
+        .commentbutton:hover {
+            background-color: #f1f5f9;
+            border-color: #cbd5e1;
+            color: #334155;
+        }
+
+        .commentssection {
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .commentinputrow {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .commentinput {
+            flex: 1;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            padding: 7px 14px;
+            font-size: 13px;
+            outline: none;
+            font-family: inherit;
+            background-color: #f8fafc;
+        }
+
+        .commentinput:focus {
+            border-color: #5B4CF6;
+            background-color: white;
+        }
+
+        .commentsubmitbutton {
+            background-color: #5B4CF6;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            outline: none;
+            white-space: nowrap;
+        }
+
+        .commentsubmitbutton:hover {
+            opacity: 0.9;
+        }
+
+        .commentslist {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .commentcard {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            font-size: 13px;
+        }
+
+        .commentmeta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 6px;
+        }
+
+        .commentauthorinfo {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .commentavatar {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #5B4CF6;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .commentauthor {
+            font-weight: 600;
+            color: #334155;
+            font-size: 12px;
+        }
+
+        .commentdate {
+            color: #94a3b8;
+            font-size: 11px;
+        }
+
+        .commenttext {
+            color: #1e293b;
+            font-size: 13px;
+            line-height: 1.4;
+            padding-left: 26px;
+            word-break: break-word;
+        }
+
+        .commentactions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-left: 26px;
+            margin-top: 2px;
+        }
+
+        .replybutton,
+        .deletecommentbutton {
+            background: transparent;
+            border: none;
+            padding: 0;
+            font-size: 11px;
+            font-weight: 600;
+            color: #64748b;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .replybutton:hover {
+            color: #5B4CF6;
+        }
+
+        .deletecommentbutton:hover {
+            color: #e53e3e;
+        }
+
+        .repliescontainer {
+            margin-left: 26px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            border-left: 2px solid #e2e8f0;
+            padding-left: 10px;
+            margin-top: 4px;
+        }
+
+        .replyinputrow {
+            display: none;
+            gap: 6px;
+            margin-left: 26px;
+            margin-top: 6px;
+        }
+
         .postavatar {
             width: 26px;
             height: 26px;
@@ -670,7 +842,7 @@
 
                     const postcard = document.createElement('div');
                     postcard.className = 'postcard';
-                    postcard.innerHTML = '<div class="postmeta"><div class="postauthorinfo"><div class="postavatar">' + authorinitial + '</div><span class="postauthor">' + postauthorname + '</span>' + (canfollow ? '<button class="followbutton' + (isfollowingauthor ? ' following' : '') + '">' + (isfollowingauthor ? 'Following' : '+ Follow') + '</button>' : '') + '<span class="postdate">' + datestring + '</span></div>' + (isauthor ? '<button class="deletepostbutton" title="Delete post">Delete</button>' : '') + '</div><div class="postbody"></div><div class="postcardfooter"><button class="likebutton' + (ispostliked ? ' liked' : '') + '"><svg class="hearticon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg><span class="likecount">' + likescount + '</span></button></div>';
+                    postcard.innerHTML = '<div class="postmeta"><div class="postauthorinfo"><div class="postavatar">' + authorinitial + '</div><span class="postauthor">' + postauthorname + '</span>' + (canfollow ? '<button class="followbutton' + (isfollowingauthor ? ' following' : '') + '">' + (isfollowingauthor ? 'Following' : '+ Follow') + '</button>' : '') + '<span class="postdate">' + datestring + '</span></div>' + (isauthor ? '<button class="deletepostbutton" title="Delete post">Delete</button>' : '') + '</div><div class="postbody"></div><div class="postcardfooter"><button class="likebutton' + (ispostliked ? ' liked' : '') + '"><svg class="hearticon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg><span class="likecount">' + likescount + '</span></button><button class="commentbutton"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg><span class="commentcount">' + (singlepost.commentscount || 0) + '</span></button></div><div class="commentssection"><div class="commentinputrow"><input type="text" class="commentinput" placeholder="Write a comment..."><button class="commentsubmitbutton">Comment</button></div><div class="commentslist"></div></div>';
                     postcard.querySelector('.postbody').textContent = singlepost.content;
 
                     if (canfollow) {
@@ -736,6 +908,167 @@
                                     likebutton.classList.remove('liked');
                                     countspan.textContent = currentcount;
                                 }
+                            }
+                        };
+                    }
+
+                    const commentbutton = postcard.querySelector('.commentbutton');
+                    const commentssection = postcard.querySelector('.commentssection');
+                    const commentcountspan = postcard.querySelector('.commentcount');
+                    const commentinput = postcard.querySelector('.commentinput');
+                    const commentsubmitbutton = postcard.querySelector('.commentsubmitbutton');
+                    const commentslist = postcard.querySelector('.commentslist');
+
+                    const loadpostcomments = async () => {
+                        const commentsresponse = await fetch(apiurl + '/comments?postid=' + encodeURIComponent(singlepost.id));
+                        if (!commentsresponse.ok) return;
+                        const allcomments = await commentsresponse.json();
+                        commentslist.innerHTML = '';
+                        commentcountspan.textContent = allcomments.length;
+
+                        const topcomments = allcomments.filter(item => !item.parent_id);
+                        const childreplies = allcomments.filter(item => !!item.parent_id);
+
+                        if (allcomments.length === 0) {
+                            const nocomments = document.createElement('div');
+                            nocomments.style.fontSize = '12px';
+                            nocomments.style.color = '#94a3b8';
+                            nocomments.style.padding = '4px 0';
+                            nocomments.textContent = 'no comments yet';
+                            commentslist.appendChild(nocomments);
+                            return;
+                        }
+
+                        topcomments.forEach(singlecomment => {
+                            const commentauthorname = singlecomment.username || 'tether user';
+                            const commentinitial = commentauthorname.charAt(0).toUpperCase();
+                            const iscommentauthor = (currentuserid && singlecomment.user_id && singlecomment.user_id === currentuserid) || (currentusername && singlecomment.username && singlecomment.username === currentusername);
+                            const commentdatestring = singlecomment.created_at ? '• ' + new Date(singlecomment.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+
+                            const commentcard = document.createElement('div');
+                            commentcard.className = 'commentcard';
+                            commentcard.innerHTML = '<div class="commentmeta"><div class="commentauthorinfo"><div class="commentavatar">' + commentinitial + '</div><span class="commentauthor">' + commentauthorname + '</span><span class="commentdate">' + commentdatestring + '</span></div>' + (iscommentauthor ? '<button class="deletecommentbutton">delete</button>' : '') + '</div><div class="commenttext"></div><div class="commentactions"><button class="replybutton">reply</button></div><div class="replyinputrow"><input type="text" class="commentinput replyinput" placeholder="Write a reply..."><button class="commentsubmitbutton replysubmitbutton">Reply</button></div><div class="repliescontainer"></div>';
+                            commentcard.querySelector('.commenttext').textContent = singlecomment.content;
+
+                            const deletecommentbutton = commentcard.querySelector('.deletecommentbutton');
+                            if (deletecommentbutton) {
+                                deletecommentbutton.onclick = async () => {
+                                    if (!confirm('delete this comment?')) return;
+                                    const currenttoken = localStorage.getItem('accesstoken');
+                                    const deleteresponse = await fetch(apiurl + '/comments?id=' + encodeURIComponent(singlecomment.id), {
+                                        method: 'DELETE',
+                                        headers: { 'authorization': 'Bearer ' + currenttoken }
+                                    });
+                                    if (deleteresponse.ok) {
+                                        loadpostcomments();
+                                    }
+                                };
+                            }
+
+                            const replybutton = commentcard.querySelector('.replybutton');
+                            const replyinputrow = commentcard.querySelector('.replyinputrow');
+                            const replyinput = commentcard.querySelector('.replyinput');
+                            const replysubmitbutton = commentcard.querySelector('.replysubmitbutton');
+
+                            if (replybutton && replyinputrow) {
+                                replybutton.onclick = () => {
+                                    const isopen = replyinputrow.style.display === 'flex';
+                                    replyinputrow.style.display = isopen ? 'none' : 'flex';
+                                    if (!isopen && replyinput) replyinput.focus();
+                                };
+                            }
+
+                            if (replysubmitbutton && replyinput) {
+                                replysubmitbutton.onclick = async () => {
+                                    const replycontent = replyinput.value.trim();
+                                    if (!replycontent) return;
+                                    const currenttoken = localStorage.getItem('accesstoken');
+                                    const replyresponse = await fetch(apiurl + '/comments', {
+                                        method: 'POST',
+                                        headers: {
+                                            'content-type': 'application/json',
+                                            'authorization': 'Bearer ' + currenttoken
+                                        },
+                                        body: JSON.stringify({
+                                            postid: singlepost.id,
+                                            content: replycontent,
+                                            parentid: singlecomment.id
+                                        })
+                                    });
+                                    if (replyresponse.ok) {
+                                        replyinput.value = '';
+                                        replyinputrow.style.display = 'none';
+                                        loadpostcomments();
+                                    }
+                                };
+                            }
+
+                            const repliescontainer = commentcard.querySelector('.repliescontainer');
+                            const thesechildren = childreplies.filter(replyitem => replyitem.parent_id === singlecomment.id);
+                            if (thesechildren.length > 0) {
+                                thesechildren.forEach(singlereply => {
+                                    const replyauthorname = singlereply.username || 'tether user';
+                                    const replyinitial = replyauthorname.charAt(0).toUpperCase();
+                                    const isreplyauthor = (currentuserid && singlereply.user_id && singlereply.user_id === currentuserid) || (currentusername && singlereply.username && singlereply.username === currentusername);
+                                    const replydatestring = singlereply.created_at ? '• ' + new Date(singlereply.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+
+                                    const replycard = document.createElement('div');
+                                    replycard.className = 'commentcard';
+                                    replycard.innerHTML = '<div class="commentmeta"><div class="commentauthorinfo"><div class="commentavatar">' + replyinitial + '</div><span class="commentauthor">' + replyauthorname + '</span><span class="commentdate">' + replydatestring + '</span></div>' + (isreplyauthor ? '<button class="deletecommentbutton">delete</button>' : '') + '</div><div class="commenttext"></div>';
+                                    replycard.querySelector('.commenttext').textContent = singlereply.content;
+
+                                    const deletereplybutton = replycard.querySelector('.deletecommentbutton');
+                                    if (deletereplybutton) {
+                                        deletereplybutton.onclick = async () => {
+                                            if (!confirm('delete this reply?')) return;
+                                            const currenttoken = localStorage.getItem('accesstoken');
+                                            const deleteresponse = await fetch(apiurl + '/comments?id=' + encodeURIComponent(singlereply.id), {
+                                                method: 'DELETE',
+                                                headers: { 'authorization': 'Bearer ' + currenttoken }
+                                            });
+                                            if (deleteresponse.ok) {
+                                                loadpostcomments();
+                                            }
+                                        };
+                                    }
+
+                                    repliescontainer.appendChild(replycard);
+                                });
+                            }
+
+                            commentslist.appendChild(commentcard);
+                        });
+                    };
+
+                    if (commentbutton && commentssection) {
+                        commentbutton.onclick = () => {
+                            const isopen = commentssection.style.display === 'flex';
+                            commentssection.style.display = isopen ? 'none' : 'flex';
+                            if (!isopen) {
+                                loadpostcomments();
+                            }
+                        };
+                    }
+
+                    if (commentsubmitbutton && commentinput) {
+                        commentsubmitbutton.onclick = async () => {
+                            const commentcontent = commentinput.value.trim();
+                            if (!commentcontent) return;
+                            const currenttoken = localStorage.getItem('accesstoken');
+                            const commentresponse = await fetch(apiurl + '/comments', {
+                                method: 'POST',
+                                headers: {
+                                    'content-type': 'application/json',
+                                    'authorization': 'Bearer ' + currenttoken
+                                },
+                                body: JSON.stringify({
+                                    postid: singlepost.id,
+                                    content: commentcontent
+                                })
+                            });
+                            if (commentresponse.ok) {
+                                commentinput.value = '';
+                                loadpostcomments();
                             }
                         };
                     }
