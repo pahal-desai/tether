@@ -36,7 +36,31 @@ export default {
                     }
                 });
 
-                const responsedata = await supabaseresponse.json();
+                let responsedata = await supabaseresponse.json().catch(() => []);
+
+                let likeslist = [];
+                try {
+                    const likesresponse = await fetch(supabaseurl + '/rest/v1/likes?select=*', {
+                        headers: {
+                            'apikey': supabasekey,
+                            'authorization': 'Bearer ' + supabasekey
+                        }
+                    });
+                    if (likesresponse.ok) {
+                        likeslist = await likesresponse.json().catch(() => []);
+                    }
+                } catch (likesfetcherror) { }
+
+                if (Array.isArray(responsedata)) {
+                    responsedata = responsedata.map(singlepost => {
+                        const postlikes = likeslist.filter(likeitem => likeitem.post_id === singlepost.id);
+                        return {
+                            ...singlepost,
+                            likescount: postlikes.length,
+                            likedusers: postlikes.map(likeitem => likeitem.user_id)
+                        };
+                    });
+                }
 
                 return new Response(JSON.stringify(responsedata), {
                     status: supabaseresponse.status,
@@ -207,6 +231,193 @@ export default {
                     status: 200,
                     headers: { ...corsheaders, 'content-type': 'application/json' }
                 });
+            }
+        }
+
+        if (urlpath.endsWith('/likes') && incomingrequest.method === 'POST') {
+            const userauth = incomingrequest.headers.get('authorization') || '';
+            let callerid = '';
+
+            if (userauth.includes('Bearer ')) {
+                try {
+                    const tokenparts = userauth.replace('Bearer ', '').trim().split('.');
+                    if (tokenparts.length === 3) {
+                        const tokendata = JSON.parse(atob(tokenparts[1]));
+                        callerid = tokendata.sub || '';
+                    }
+                } catch (tokenparseerror) { }
+            }
+
+            if (!callerid) {
+                return new Response(JSON.stringify({ error: 'unauthorized' }), {
+                    status: 401,
+                    headers: { ...corsheaders, 'content-type': 'application/json' }
+                });
+            }
+
+            const requestbody = await incomingrequest.json().catch(() => ({}));
+            const postid = requestbody.postid;
+
+            if (!postid) {
+                return new Response(JSON.stringify({ error: 'missing post id' }), {
+                    status: 400,
+                    headers: { ...corsheaders, 'content-type': 'application/json' }
+                });
+            }
+
+            const checklikeresponse = await fetch(supabaseurl + '/rest/v1/likes?post_id=eq.' + encodeURIComponent(postid) + '&user_id=eq.' + encodeURIComponent(callerid), {
+                headers: {
+                    'apikey': supabasekey,
+                    'authorization': 'Bearer ' + supabasekey
+                }
+            });
+
+            const existinglikes = await checklikeresponse.json().catch(() => []);
+
+            if (Array.isArray(existinglikes) && existinglikes.length > 0) {
+                await fetch(supabaseurl + '/rest/v1/likes?post_id=eq.' + encodeURIComponent(postid) + '&user_id=eq.' + encodeURIComponent(callerid), {
+                    method: 'DELETE',
+                    headers: {
+                        'apikey': supabasekey,
+                        'authorization': 'Bearer ' + supabasekey
+                    }
+                });
+
+                return new Response(JSON.stringify({ liked: false }), {
+                    status: 200,
+                    headers: { ...corsheaders, 'content-type': 'application/json' }
+                });
+            } else {
+                await fetch(supabaseurl + '/rest/v1/likes', {
+                    method: 'POST',
+                    headers: {
+                        'apikey': supabasekey,
+                        'authorization': 'Bearer ' + supabasekey,
+                        'content-type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        post_id: postid,
+                        user_id: callerid
+                    })
+                });
+
+                return new Response(JSON.stringify({ liked: true }), {
+                    status: 200,
+                    headers: { ...corsheaders, 'content-type': 'application/json' }
+                });
+            }
+        }
+
+        if (urlpath.endsWith('/follows')) {
+            const userauth = incomingrequest.headers.get('authorization') || '';
+            let callerid = '';
+            let callerusername = '';
+
+            if (userauth.includes('Bearer ')) {
+                try {
+                    const tokenparts = userauth.replace('Bearer ', '').trim().split('.');
+                    if (tokenparts.length === 3) {
+                        const tokendata = JSON.parse(atob(tokenparts[1]));
+                        callerid = tokendata.sub || '';
+                        callerusername = tokendata.user_metadata?.username || tokendata.user_metadata?.preferred_username || '';
+                    }
+                } catch (tokenparseerror) { }
+            }
+
+            if (incomingrequest.method === 'GET') {
+                if (!callerid) {
+                    return new Response(JSON.stringify({ following: [], followerscount: 0, followingcount: 0 }), {
+                        status: 200,
+                        headers: { ...corsheaders, 'content-type': 'application/json' }
+                    });
+                }
+
+                let allfollows = [];
+                try {
+                    const followsresponse = await fetch(supabaseurl + '/rest/v1/follows?select=*', {
+                        headers: {
+                            'apikey': supabasekey,
+                            'authorization': 'Bearer ' + supabasekey
+                        }
+                    });
+                    if (followsresponse.ok) {
+                        allfollows = await followsresponse.json().catch(() => []);
+                    }
+                } catch (followsfetcherror) { }
+
+                const myfollowing = allfollows.filter(item => item.follower_id === callerid).map(item => item.following_username);
+                const myfollowers = allfollows.filter(item => item.following_username === callerusername);
+
+                return new Response(JSON.stringify({
+                    following: myfollowing,
+                    followingcount: myfollowing.length,
+                    followerscount: myfollowers.length
+                }), {
+                    status: 200,
+                    headers: { ...corsheaders, 'content-type': 'application/json' }
+                });
+            }
+
+            if (incomingrequest.method === 'POST') {
+                if (!callerid) {
+                    return new Response(JSON.stringify({ error: 'unauthorized' }), {
+                        status: 401,
+                        headers: { ...corsheaders, 'content-type': 'application/json' }
+                    });
+                }
+
+                const requestbody = await incomingrequest.json().catch(() => ({}));
+                const targetusername = requestbody.username;
+
+                if (!targetusername) {
+                    return new Response(JSON.stringify({ error: 'missing username' }), {
+                        status: 400,
+                        headers: { ...corsheaders, 'content-type': 'application/json' }
+                    });
+                }
+
+                const checkfollowresponse = await fetch(supabaseurl + '/rest/v1/follows?follower_id=eq.' + encodeURIComponent(callerid) + '&following_username=eq.' + encodeURIComponent(targetusername), {
+                    headers: {
+                        'apikey': supabasekey,
+                        'authorization': 'Bearer ' + supabasekey
+                    }
+                });
+
+                const existingfollows = await checkfollowresponse.json().catch(() => []);
+
+                if (Array.isArray(existingfollows) && existingfollows.length > 0) {
+                    await fetch(supabaseurl + '/rest/v1/follows?follower_id=eq.' + encodeURIComponent(callerid) + '&following_username=eq.' + encodeURIComponent(targetusername), {
+                        method: 'DELETE',
+                        headers: {
+                            'apikey': supabasekey,
+                            'authorization': 'Bearer ' + supabasekey
+                        }
+                    });
+
+                    return new Response(JSON.stringify({ following: false }), {
+                        status: 200,
+                        headers: { ...corsheaders, 'content-type': 'application/json' }
+                    });
+                } else {
+                    await fetch(supabaseurl + '/rest/v1/follows', {
+                        method: 'POST',
+                        headers: {
+                            'apikey': supabasekey,
+                            'authorization': 'Bearer ' + supabasekey,
+                            'content-type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            follower_id: callerid,
+                            follower_username: callerusername,
+                            following_username: targetusername
+                        })
+                    });
+
+                    return new Response(JSON.stringify({ following: true }), {
+                        status: 200,
+                        headers: { ...corsheaders, 'content-type': 'application/json' }
+                    });
+                }
             }
         }
 

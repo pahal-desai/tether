@@ -1,9 +1,8 @@
 <html>
 
 <head>
-    <link rel="icon" type="image/x-icon" href="assets/favicon.ico ">
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
     <title>Tether — Explore</title>
-    <link rel="stylesheet" href="signup.css">
     <script>
         const savedtoken = localStorage.getItem('accesstoken');
         if (!savedtoken) {
@@ -11,6 +10,17 @@
         }
     </script>
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body,
+        button,
+        textarea,
+        input {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
         body {
             margin: 0;
             display: flex;
@@ -26,7 +36,6 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            box-sizing: border-box;
             position: fixed;
             top: 0;
             left: 0;
@@ -56,7 +65,6 @@
             font-weight: bold;
             font-size: 15px;
             width: 100%;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
             margin-bottom: 8px;
         }
 
@@ -69,7 +77,6 @@
             outline: none;
             color: #333;
             font-size: 15px;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
             text-align: left;
             width: 100%;
             transition: background-color 0.2s ease, color 0.2s ease;
@@ -95,19 +102,32 @@
             min-width: 0;
         }
 
-        .accountavatar {
-            width: 32px;
-            height: 32px;
+        .accountavatar,
+        .postavatar,
+        .creatoravatar {
             border-radius: 50%;
             background-color: #5B4CF6;
             color: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 13px;
             font-weight: bold;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
             flex-shrink: 0;
+        }
+
+        .accountavatar {
+            width: 32px;
+            height: 32px;
+            font-size: 13px;
+        }
+
+        .accountname {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .accountmeta {
@@ -116,14 +136,11 @@
             flex-direction: column;
         }
 
-        .accountname {
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-            font-size: 13px;
-            font-weight: 600;
-            color: #333;
+        .accountstats {
+            font-size: 11px;
+            color: #718096;
+            margin-top: 1px;
             white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
         }
 
         .signoutbutton {
@@ -136,7 +153,6 @@
             font-size: 12px;
             font-weight: 600;
             outline: none;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
             transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
             white-space: nowrap;
         }
@@ -153,29 +169,234 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: space-between;
-            min-height: 100vh;
             padding: 30px 20px;
-            box-sizing: border-box;
+            min-height: 100vh;
         }
 
-        .login {
-            margin: auto;
-        }
-
-        footer {
-            margin-top: auto;
-            padding-top: 30px;
+        .feedwrapper {
             width: 100%;
+            max-width: 620px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
         }
 
-        footer a {
+        .pagetitle {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .pagedesc {
+            font-size: 14px;
+            color: #64748b;
+            margin: -8px 0 4px 0;
+        }
+
+        .suggestedsection {
+            background-color: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 14px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .suggestedtitle {
+            font-size: 13px;
+            font-weight: 700;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .creatorsrow {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+
+        .creatorcard {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            padding: 6px 12px;
+            flex-shrink: 0;
+        }
+
+        .creatoravatar {
+            width: 24px;
+            height: 24px;
+            font-size: 11px;
+        }
+
+        .creatorname {
+            font-size: 12px;
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .postsfeed {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .postcard {
+            background-color: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 18px 22px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .postcard:hover {
+            border-color: #cbd5e1;
+            box-shadow: 0 4px 12px rgba(91, 76, 246, 0.06);
+        }
+
+        .postmeta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            font-size: 13px;
+            color: #718096;
+        }
+
+        .postauthorinfo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .deletepostbutton {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            font-size: 12px;
+            cursor: pointer;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-weight: 500;
+            outline: none;
+            transition: color 0.15s ease, background-color 0.15s ease;
+        }
+
+        .deletepostbutton:hover {
+            color: #e53e3e;
+            background-color: #fff5f5;
+        }
+
+        .followbutton {
+            background: transparent;
+            border: 1px solid #5B4CF6;
             color: #5B4CF6;
-            text-decoration: none;
+            border-radius: 12px;
+            padding: 2px 8px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            outline: none;
+            transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
         }
 
-        footer a:hover {
-            text-decoration: underline;
+        .followbutton:hover {
+            background-color: #5B4CF6;
+            color: white;
+        }
+
+        .followbutton.following {
+            background-color: #f1f5f9;
+            border-color: #cbd5e1;
+            color: #64748b;
+        }
+
+        .followbutton.following:hover {
+            background-color: #fff1f2;
+            border-color: #fecdd3;
+            color: #e11d48;
+        }
+
+        .postcardfooter {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-top: 8px;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .likebutton {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: transparent;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            padding: 4px 10px;
+            font-size: 12px;
+            color: #64748b;
+            cursor: pointer;
+            outline: none;
+            transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+        }
+
+        .likebutton:hover {
+            background-color: #fff1f2;
+            border-color: #fecdd3;
+            color: #e11d48;
+        }
+
+        .likebutton.liked {
+            background-color: #fff1f2;
+            border-color: #fecdd3;
+            color: #e11d48;
+            font-weight: 600;
+        }
+
+        .postavatar {
+            width: 26px;
+            height: 26px;
+            font-size: 11px;
+        }
+
+        .postauthor {
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .postdate {
+            color: #a0aec0;
+            font-size: 12px;
+        }
+
+        .postbody {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #1a202c;
+            word-break: break-word;
+            white-space: pre-wrap;
+        }
+
+        .emptystate {
+            background-color: white;
+            border: 1px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            color: #718096;
+            font-size: 14px;
         }
 
         .modaloverlay {
@@ -197,8 +418,6 @@
             padding: 24px;
             width: 400px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-            box-sizing: border-box;
         }
 
         .modalheader {
@@ -234,11 +453,9 @@
             border: 1px solid #ccc;
             border-radius: 8px;
             padding: 10px;
-            font-family: inherit;
             font-size: 14px;
             resize: none;
             outline: none;
-            box-sizing: border-box;
             margin-bottom: 15px;
         }
 
@@ -258,6 +475,21 @@
             float: right;
             outline: none;
         }
+
+        footer {
+            margin-top: auto;
+            padding-top: 30px;
+            width: 100%;
+        }
+
+        footer a {
+            color: #5B4CF6;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 
@@ -272,9 +504,10 @@
         </div>
         <div class="sidebaraccount">
             <div class="accountinfo">
-                <div class="accountavatar">U</div>
+                <div class="accountavatar" id="accountavatar">U</div>
                 <div class="accountmeta">
-                    <span class="accountname"></span>Account</span>
+                    <span class="accountname" id="accountname">Account</span>
+                    <span class="accountstats" id="accountstats">0 followers • 0 following</span>
                 </div>
             </div>
             <button class="signoutbutton" id="signoutbutton">Sign Out</button>
@@ -282,11 +515,14 @@
     </div>
 
     <div class="maincontent">
-        <div class="login" align="center">
-            <h3>Explore</h3>
-            <p
-                style="font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; font-size: 15px; margin: 15px 0;">
-                Discover new topics, communities, and people based on shared interests.</p>
+        <div class="feedwrapper">
+            <h3 class="pagetitle">Explore</h3>
+            <p class="pagedesc">Discover new posts and creators across Tether.</p>
+            <div class="suggestedsection" id="suggestedsection" style="display: none;">
+                <div class="suggestedtitle">Suggested Creators</div>
+                <div class="creatorsrow" id="creatorsrow"></div>
+            </div>
+            <div class="postsfeed" id="postsfeed"></div>
         </div>
         <footer>
             <p
@@ -308,56 +544,328 @@
     </div>
 
     <script>
+        const apiurl = 'https://little-firefly-b421.desaipahal64.workers.dev/api';
+
+        function getusernamefromtoken(tokenstring) {
+            try {
+                const payloadpart = tokenstring.split('.')[1];
+                const decodedpayload = JSON.parse(atob(payloadpart));
+                return decodedpayload.user_metadata?.username || decodedpayload.user_metadata?.preferred_username || '';
+            } catch (e) {
+                return '';
+            }
+        }
+
+        function getuseridfromtoken(tokenstring) {
+            try {
+                const payloadpart = tokenstring.split('.')[1];
+                const decodedpayload = JSON.parse(atob(payloadpart));
+                return decodedpayload.sub || '';
+            } catch (e) {
+                return '';
+            }
+        }
+
+        const currenttoken = localStorage.getItem('accesstoken');
+        const currentuserid = currenttoken ? getuseridfromtoken(currenttoken) : '';
+        let currentusername = localStorage.getItem('username') || '';
+        if (!currentusername && currenttoken) {
+            currentusername = getusernamefromtoken(currenttoken);
+            if (currentusername) {
+                localStorage.setItem('username', currentusername);
+            }
+        }
+
+        function updateaccountdisplay() {
+            const accountavatar = document.querySelector('#accountavatar');
+            const accountname = document.querySelector('#accountname');
+            const displayname = currentusername || 'account';
+            const displayinitial = displayname.charAt(0).toUpperCase();
+            if (accountavatar) accountavatar.textContent = displayinitial;
+            if (accountname) accountname.textContent = displayname;
+        }
+        updateaccountdisplay();
+
+        let myfollowinglist = [];
+
+        async function loadfollowstats() {
+            const tokenforstats = localStorage.getItem('accesstoken');
+            if (!tokenforstats) return;
+            try {
+                const followsresponse = await fetch(apiurl + '/follows', {
+                    headers: { 'authorization': 'Bearer ' + tokenforstats }
+                });
+                if (followsresponse.ok) {
+                    const followsdata = await followsresponse.json();
+                    myfollowinglist = followsdata.following || [];
+                    const accountstats = document.querySelector('#accountstats');
+                    if (accountstats) {
+                        accountstats.textContent = (followsdata.followerscount || 0) + ' followers • ' + (followsdata.followingcount || 0) + ' following';
+                    }
+                }
+            } catch (followsfetcherror) { }
+        }
+
+        async function loadposts() {
+            const feedcontainer = document.querySelector('#postsfeed');
+            const suggestedsection = document.querySelector('#suggestedsection');
+            const creatorsrow = document.querySelector('#creatorsrow');
+            if (!feedcontainer) return;
+            await loadfollowstats();
+            const postsresponse = await fetch(apiurl + '/posts');
+            if (postsresponse.ok) {
+                const postslist = await postsresponse.json();
+                feedcontainer.innerHTML = '';
+                if (creatorsrow) creatorsrow.innerHTML = '';
+
+                const uniquecreators = [];
+                for (let k = 0; k < postslist.length; k++) {
+                    const candidateusername = postslist[k].username;
+                    if (candidateusername && candidateusername !== 'tether user' && candidateusername !== currentusername && !uniquecreators.includes(candidateusername)) {
+                        uniquecreators.push(candidateusername);
+                    }
+                }
+
+                if (suggestedsection && creatorsrow) {
+                    if (uniquecreators.length > 0) {
+                        suggestedsection.style.display = 'flex';
+                        for (let m = 0; m < uniquecreators.length; m++) {
+                            const creatorname = uniquecreators[m];
+                            const isfollowing = myfollowinglist.includes(creatorname);
+                            const creatorcard = document.createElement('div');
+                            creatorcard.className = 'creatorcard';
+                            creatorcard.innerHTML = '<div class="creatoravatar">' + creatorname.charAt(0).toUpperCase() + '</div><span class="creatorname">' + creatorname + '</span><button class="followbutton' + (isfollowing ? ' following' : '') + '">' + (isfollowing ? 'Following' : '+ Follow') + '</button>';
+                            const rowfollowbutton = creatorcard.querySelector('.followbutton');
+                            if (rowfollowbutton) {
+                                rowfollowbutton.onclick = async () => {
+                                    const tokenforfollow = localStorage.getItem('accesstoken');
+                                    const followresponse = await fetch(apiurl + '/follows', {
+                                        method: 'POST',
+                                        headers: {
+                                            'content-type': 'application/json',
+                                            'authorization': 'Bearer ' + tokenforfollow
+                                        },
+                                        body: JSON.stringify({ username: creatorname })
+                                    });
+                                    if (followresponse.ok) {
+                                        const followdata = await followresponse.json();
+                                        if (followdata.following) {
+                                            if (!myfollowinglist.includes(creatorname)) myfollowinglist.push(creatorname);
+                                            rowfollowbutton.className = 'followbutton following';
+                                            rowfollowbutton.textContent = 'Following';
+                                        } else {
+                                            myfollowinglist = myfollowinglist.filter(item => item !== creatorname);
+                                            rowfollowbutton.className = 'followbutton';
+                                            rowfollowbutton.textContent = '+ Follow';
+                                        }
+                                        loadfollowstats();
+                                        document.querySelectorAll('.postcard').forEach(singlecard => {
+                                            const authornameelement = singlecard.querySelector('.postauthor');
+                                            if (authornameelement && authornameelement.textContent === creatorname) {
+                                                const cardfollowbtn = singlecard.querySelector('.followbutton');
+                                                if (cardfollowbtn) {
+                                                    const nowfollowing = myfollowinglist.includes(creatorname);
+                                                    cardfollowbtn.className = 'followbutton' + (nowfollowing ? ' following' : '');
+                                                    cardfollowbtn.textContent = nowfollowing ? 'Following' : '+ Follow';
+                                                }
+                                            }
+                                        });
+                                    }
+                                };
+                            }
+                            creatorsrow.appendChild(creatorcard);
+                        }
+                    } else {
+                        suggestedsection.style.display = 'none';
+                    }
+                }
+
+                if (postslist.length === 0) {
+                    const emptybox = document.createElement('div');
+                    emptybox.className = 'emptystate';
+                    emptybox.innerText = 'no posts yet. be the first to share something!';
+                    feedcontainer.appendChild(emptybox);
+                    return;
+                }
+
+                for (let i = postslist.length - 1; i > 0; i--) {
+                    const randomindex = Math.floor(Math.random() * (i + 1));
+                    const temppost = postslist[i];
+                    postslist[i] = postslist[randomindex];
+                    postslist[randomindex] = temppost;
+                }
+
+                for (let i = 0; i < postslist.length; i++) {
+                    const singlepost = postslist[i];
+                    const postauthorname = singlepost.username || 'tether user';
+                    const authorinitial = postauthorname.charAt(0).toUpperCase();
+                    const datestring = singlepost.created_at ? '• ' + new Date(singlepost.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+                    const isauthor = (currentuserid && singlepost.user_id && singlepost.user_id === currentuserid) || (currentusername && singlepost.username && singlepost.username === currentusername);
+                    const isfollowingauthor = myfollowinglist.includes(postauthorname);
+                    const canfollow = !isauthor && postauthorname !== 'tether user' && postauthorname !== currentusername;
+                    const ispostliked = singlepost.likedusers && currentuserid && singlepost.likedusers.includes(currentuserid);
+                    const likescount = singlepost.likescount || 0;
+
+                    const postcard = document.createElement('div');
+                    postcard.className = 'postcard';
+                    postcard.innerHTML = '<div class="postmeta"><div class="postauthorinfo"><div class="postavatar">' + authorinitial + '</div><span class="postauthor">' + postauthorname + '</span>' + (canfollow ? '<button class="followbutton' + (isfollowingauthor ? ' following' : '') + '">' + (isfollowingauthor ? 'Following' : '+ Follow') + '</button>' : '') + '<span class="postdate">' + datestring + '</span></div>' + (isauthor ? '<button class="deletepostbutton" title="Delete post">Delete</button>' : '') + '</div><div class="postbody"></div><div class="postcardfooter"><button class="likebutton' + (ispostliked ? ' liked' : '') + '"><svg class="hearticon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg><span class="likecount">' + likescount + '</span></button></div>';
+                    postcard.querySelector('.postbody').textContent = singlepost.content;
+
+                    if (canfollow) {
+                        const followbutton = postcard.querySelector('.followbutton');
+                        if (followbutton) {
+                            followbutton.onclick = async () => {
+                                const tokenforfollow = localStorage.getItem('accesstoken');
+                                const followresponse = await fetch(apiurl + '/follows', {
+                                    method: 'POST',
+                                    headers: {
+                                        'content-type': 'application/json',
+                                        'authorization': 'Bearer ' + tokenforfollow
+                                    },
+                                    body: JSON.stringify({ username: postauthorname })
+                                });
+                                if (followresponse.ok) {
+                                    const followdata = await followresponse.json();
+                                    if (followdata.following) {
+                                        if (!myfollowinglist.includes(postauthorname)) myfollowinglist.push(postauthorname);
+                                        followbutton.className = 'followbutton following';
+                                        followbutton.textContent = 'Following';
+                                    } else {
+                                        myfollowinglist = myfollowinglist.filter(item => item !== postauthorname);
+                                        followbutton.className = 'followbutton';
+                                        followbutton.textContent = '+ Follow';
+                                    }
+                                    loadfollowstats();
+                                }
+                            };
+                        }
+                    }
+
+                    const likebutton = postcard.querySelector('.likebutton');
+                    if (likebutton) {
+                        likebutton.onclick = async () => {
+                            const tokenforlike = localStorage.getItem('accesstoken');
+                            const countspan = likebutton.querySelector('.likecount');
+                            let currentcount = parseInt(countspan.textContent, 10) || 0;
+                            const wasliked = likebutton.classList.contains('liked');
+
+                            if (wasliked) {
+                                likebutton.classList.remove('liked');
+                                countspan.textContent = Math.max(0, currentcount - 1);
+                            } else {
+                                likebutton.classList.add('liked');
+                                countspan.textContent = currentcount + 1;
+                            }
+
+                            const likeresponse = await fetch(apiurl + '/likes', {
+                                method: 'POST',
+                                headers: {
+                                    'content-type': 'application/json',
+                                    'authorization': 'Bearer ' + tokenforlike
+                                },
+                                body: JSON.stringify({ postid: singlepost.id })
+                            });
+
+                            if (!likeresponse.ok) {
+                                if (wasliked) {
+                                    likebutton.classList.add('liked');
+                                    countspan.textContent = currentcount;
+                                } else {
+                                    likebutton.classList.remove('liked');
+                                    countspan.textContent = currentcount;
+                                }
+                            }
+                        };
+                    }
+
+                    if (isauthor) {
+                        const deletebutton = postcard.querySelector('.deletepostbutton');
+                        if (deletebutton) {
+                            deletebutton.onclick = async () => {
+                                if (!confirm('delete this post?')) return;
+                                const tokenfordelete = localStorage.getItem('accesstoken');
+                                const deleteresponse = await fetch(apiurl + '/posts?id=' + encodeURIComponent(singlepost.id), {
+                                    method: 'DELETE',
+                                    headers: {
+                                        'authorization': 'Bearer ' + tokenfordelete
+                                    }
+                                });
+                                if (deleteresponse.ok) {
+                                    postcard.remove();
+                                    if (feedcontainer.children.length === 0) {
+                                        const emptybox = document.createElement('div');
+                                        emptybox.className = 'emptystate';
+                                        emptybox.innerText = 'no posts yet. be the first to share something!';
+                                        feedcontainer.appendChild(emptybox);
+                                    }
+                                } else {
+                                    const deleteerror = await deleteresponse.json().catch(() => ({}));
+                                    alert(deleteerror.error || 'failed to delete post');
+                                }
+                            };
+                        }
+                    }
+
+                    feedcontainer.appendChild(postcard);
+                }
+            }
+        }
+        loadposts();
+
         const openmodalbutton = document.querySelector('.createbutton');
         const modaloverlay = document.querySelector('#postmodal');
         const closemodalbutton = document.querySelector('#closemodal');
         const publishbutton = document.querySelector('#publishpost');
 
-        if (openmodalbutton && modaloverlay) {
-            openmodalbutton.addEventListener('click', function () {
-                modaloverlay.style.display = 'flex';
-            });
-        }
+        const openmodal = () => { modaloverlay.style.display = 'flex'; };
+        const closemodal = () => { modaloverlay.style.display = 'none'; };
 
-        if (closemodalbutton && modaloverlay) {
-            closemodalbutton.addEventListener('click', function () {
-                modaloverlay.style.display = 'none';
-            });
-        }
-
-        if (modaloverlay) {
-            modaloverlay.addEventListener('click', function (overlayevent) {
-                if (overlayevent.target === modaloverlay) {
-                    modaloverlay.style.display = 'none';
-                }
-            });
-        }
+        if (openmodalbutton) openmodalbutton.onclick = openmodal;
+        if (closemodalbutton) closemodalbutton.onclick = closemodal;
+        if (modaloverlay) modaloverlay.onclick = (e) => { if (e.target === modaloverlay) closemodal(); };
 
         if (publishbutton && modaloverlay) {
-            publishbutton.addEventListener('click', function () {
+            publishbutton.onclick = async () => {
                 const textarea = modaloverlay.querySelector('textarea');
-                if (textarea) {
+                const posttext = textarea ? textarea.value.trim() : '';
+                if (!posttext) return;
+                const tokenforpublish = localStorage.getItem('accesstoken');
+                const postresponse = await fetch(apiurl + '/posts', {
+                    method: 'POST',
+                    headers: {
+                        'content-type': 'application/json',
+                        'authorization': 'Bearer ' + tokenforpublish
+                    },
+                    body: JSON.stringify({
+                        content: posttext,
+                        username: currentusername || localStorage.getItem('username') || 'tether user'
+                    })
+                });
+                if (postresponse.ok) {
                     textarea.value = '';
+                    closemodal();
+                    loadposts();
+                } else {
+                    const posterror = await postresponse.json();
+                    if (posterror.error && posterror.error.toLowerCase().includes('jwt')) {
+                        localStorage.removeItem('accesstoken');
+                        localStorage.removeItem('username');
+                        alert('session expired. please sign in again.');
+                        window.location.href = 'login.html';
+                        return;
+                    }
+                    alert(posterror.error || 'failed to create post');
                 }
-                modaloverlay.style.display = 'none';
-            });
-        }
-
-        const storedusername = localStorage.getItem('username');
-        if (storedusername) {
-            const accountavatar = document.querySelector('.accountavatar');
-            const accountname = document.querySelector('.accountname');
-            if (accountavatar) accountavatar.textContent = storedusername.charAt(0).toUpperCase();
-            if (accountname) accountname.textContent = storedusername;
+            };
         }
 
         const signoutbutton = document.querySelector('#signoutbutton');
         if (signoutbutton) {
-            signoutbutton.addEventListener('click', function () {
+            signoutbutton.onclick = () => {
                 localStorage.removeItem('accesstoken');
                 localStorage.removeItem('username');
                 window.location.href = 'login.html';
-            });
+            };
         }
     </script>
 </body>

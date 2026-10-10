@@ -141,6 +141,19 @@
             text-overflow: ellipsis;
         }
 
+        .accountmeta {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .accountstats {
+            font-size: 11px;
+            color: #718096;
+            margin-top: 1px;
+            white-space: nowrap;
+        }
+
         .signoutbutton {
             border: 1px solid #e2e8f0;
             background-color: white;
@@ -263,6 +276,72 @@
         .deletepostbutton:hover {
             color: #e53e3e;
             background-color: #fff5f5;
+        }
+
+        .followbutton {
+            background: transparent;
+            border: 1px solid #5B4CF6;
+            color: #5B4CF6;
+            border-radius: 12px;
+            padding: 2px 8px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            outline: none;
+            transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+        }
+
+        .followbutton:hover {
+            background-color: #5B4CF6;
+            color: white;
+        }
+
+        .followbutton.following {
+            background-color: #f1f5f9;
+            border-color: #cbd5e1;
+            color: #64748b;
+        }
+
+        .followbutton.following:hover {
+            background-color: #fff1f2;
+            border-color: #fecdd3;
+            color: #e11d48;
+        }
+
+        .postcardfooter {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-top: 8px;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .likebutton {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: transparent;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            padding: 4px 10px;
+            font-size: 12px;
+            color: #64748b;
+            cursor: pointer;
+            outline: none;
+            transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+        }
+
+        .likebutton:hover {
+            background-color: #fff1f2;
+            border-color: #fecdd3;
+            color: #e11d48;
+        }
+
+        .likebutton.liked {
+            background-color: #fff1f2;
+            border-color: #fecdd3;
+            color: #e11d48;
+            font-weight: 600;
         }
 
         .postavatar {
@@ -419,7 +498,10 @@
         <div class="sidebaraccount">
             <div class="accountinfo">
                 <div class="accountavatar" id="accountavatar">U</div>
-                <div class="accountname" id="accountname">Account</div>
+                <div class="accountmeta">
+                    <span class="accountname" id="accountname">Account</span>
+                    <span class="accountstats" id="accountstats">0 followers • 0 following</span>
+                </div>
             </div>
             <button class="signoutbutton" id="signoutbutton">Sign Out</button>
         </div>
@@ -539,9 +621,30 @@
             };
         }
 
+        let myfollowinglist = [];
+
+        async function loadfollowstats() {
+            const currenttoken = localStorage.getItem('accesstoken');
+            if (!currenttoken) return;
+            try {
+                const followsresponse = await fetch(apiurl + '/follows', {
+                    headers: { 'authorization': 'Bearer ' + currenttoken }
+                });
+                if (followsresponse.ok) {
+                    const followsdata = await followsresponse.json();
+                    myfollowinglist = followsdata.following || [];
+                    const accountstats = document.querySelector('#accountstats');
+                    if (accountstats) {
+                        accountstats.textContent = (followsdata.followerscount || 0) + ' followers • ' + (followsdata.followingcount || 0) + ' following';
+                    }
+                }
+            } catch (followsfetcherror) { }
+        }
+
         async function loadposts() {
             const feedcontainer = document.querySelector('#postsfeed');
             if (!feedcontainer) return;
+            await loadfollowstats();
             const postsresponse = await fetch(apiurl + '/posts');
             if (postsresponse.ok) {
                 const postslist = await postsresponse.json();
@@ -553,17 +656,89 @@
                     feedcontainer.appendChild(emptybox);
                     return;
                 }
+                postslist.sort((firstitem, seconditem) => new Date(seconditem.created_at || 0) - new Date(firstitem.created_at || 0));
                 for (let i = 0; i < postslist.length; i++) {
                     const singlepost = postslist[i];
                     const postauthorname = singlepost.username || 'tether user';
                     const authorinitial = postauthorname.charAt(0).toUpperCase();
                     const datestring = singlepost.created_at ? '• ' + new Date(singlepost.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '';
                     const isauthor = (currentuserid && singlepost.user_id && singlepost.user_id === currentuserid) || (currentusername && singlepost.username && singlepost.username === currentusername);
+                    const isfollowingauthor = myfollowinglist.includes(postauthorname);
+                    const canfollow = !isauthor && postauthorname !== 'tether user' && postauthorname !== currentusername;
+                    const ispostliked = singlepost.likedusers && currentuserid && singlepost.likedusers.includes(currentuserid);
+                    const likescount = singlepost.likescount || 0;
 
                     const postcard = document.createElement('div');
                     postcard.className = 'postcard';
-                    postcard.innerHTML = '<div class="postmeta"><div class="postauthorinfo"><div class="postavatar">' + authorinitial + '</div><span class="postauthor">' + postauthorname + '</span><span class="postdate">' + datestring + '</span></div>' + (isauthor ? '<button class="deletepostbutton" title="Delete post">Delete</button>' : '') + '</div><div class="postbody"></div>';
+                    postcard.innerHTML = '<div class="postmeta"><div class="postauthorinfo"><div class="postavatar">' + authorinitial + '</div><span class="postauthor">' + postauthorname + '</span>' + (canfollow ? '<button class="followbutton' + (isfollowingauthor ? ' following' : '') + '">' + (isfollowingauthor ? 'Following' : '+ Follow') + '</button>' : '') + '<span class="postdate">' + datestring + '</span></div>' + (isauthor ? '<button class="deletepostbutton" title="Delete post">Delete</button>' : '') + '</div><div class="postbody"></div><div class="postcardfooter"><button class="likebutton' + (ispostliked ? ' liked' : '') + '"><svg class="hearticon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg><span class="likecount">' + likescount + '</span></button></div>';
                     postcard.querySelector('.postbody').textContent = singlepost.content;
+
+                    if (canfollow) {
+                        const followbutton = postcard.querySelector('.followbutton');
+                        if (followbutton) {
+                            followbutton.onclick = async () => {
+                                const currenttoken = localStorage.getItem('accesstoken');
+                                const followresponse = await fetch(apiurl + '/follows', {
+                                    method: 'POST',
+                                    headers: {
+                                        'content-type': 'application/json',
+                                        'authorization': 'Bearer ' + currenttoken
+                                    },
+                                    body: JSON.stringify({ username: postauthorname })
+                                });
+                                if (followresponse.ok) {
+                                    const followdata = await followresponse.json();
+                                    if (followdata.following) {
+                                        if (!myfollowinglist.includes(postauthorname)) myfollowinglist.push(postauthorname);
+                                        followbutton.className = 'followbutton following';
+                                        followbutton.textContent = 'Following';
+                                    } else {
+                                        myfollowinglist = myfollowinglist.filter(item => item !== postauthorname);
+                                        followbutton.className = 'followbutton';
+                                        followbutton.textContent = '+ Follow';
+                                    }
+                                    loadfollowstats();
+                                }
+                            };
+                        }
+                    }
+
+                    const likebutton = postcard.querySelector('.likebutton');
+                    if (likebutton) {
+                        likebutton.onclick = async () => {
+                            const currenttoken = localStorage.getItem('accesstoken');
+                            const countspan = likebutton.querySelector('.likecount');
+                            let currentcount = parseInt(countspan.textContent, 10) || 0;
+                            const wasliked = likebutton.classList.contains('liked');
+
+                            if (wasliked) {
+                                likebutton.classList.remove('liked');
+                                countspan.textContent = Math.max(0, currentcount - 1);
+                            } else {
+                                likebutton.classList.add('liked');
+                                countspan.textContent = currentcount + 1;
+                            }
+
+                            const likeresponse = await fetch(apiurl + '/likes', {
+                                method: 'POST',
+                                headers: {
+                                    'content-type': 'application/json',
+                                    'authorization': 'Bearer ' + currenttoken
+                                },
+                                body: JSON.stringify({ postid: singlepost.id })
+                            });
+
+                            if (!likeresponse.ok) {
+                                if (wasliked) {
+                                    likebutton.classList.add('liked');
+                                    countspan.textContent = currentcount;
+                                } else {
+                                    likebutton.classList.remove('liked');
+                                    countspan.textContent = currentcount;
+                                }
+                            }
+                        };
+                    }
 
                     if (isauthor) {
                         const deletebutton = postcard.querySelector('.deletepostbutton');
@@ -597,6 +772,7 @@
                 }
             }
         }
+
         loadposts();
 
         const openmodalbutton = document.querySelector('.createbutton');
