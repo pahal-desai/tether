@@ -235,9 +235,34 @@
         .postmeta {
             display: flex;
             align-items: center;
+            justify-content: space-between;
             gap: 8px;
             font-size: 13px;
             color: #718096;
+        }
+
+        .postauthorinfo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .deletepostbutton {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            font-size: 12px;
+            cursor: pointer;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-weight: 500;
+            outline: none;
+            transition: color 0.15s ease, background-color 0.15s ease;
+        }
+
+        .deletepostbutton:hover {
+            color: #e53e3e;
+            background-color: #fff5f5;
         }
 
         .postavatar {
@@ -452,7 +477,18 @@
             }
         }
 
+        function getuseridfromtoken(tokenstring) {
+            try {
+                const payloadpart = tokenstring.split('.')[1];
+                const decodedpayload = JSON.parse(atob(payloadpart));
+                return decodedpayload.sub || '';
+            } catch (e) {
+                return '';
+            }
+        }
+
         const savedtoken = localStorage.getItem('accesstoken');
+        const currentuserid = savedtoken ? getuseridfromtoken(savedtoken) : '';
         let currentusername = localStorage.getItem('username') || '';
         if (!currentusername && savedtoken) {
             currentusername = getusernamefromtoken(savedtoken);
@@ -522,10 +558,41 @@
                     const postauthorname = singlepost.username || 'tether user';
                     const authorinitial = postauthorname.charAt(0).toUpperCase();
                     const datestring = singlepost.created_at ? '• ' + new Date(singlepost.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+                    const isauthor = (currentuserid && singlepost.user_id && singlepost.user_id === currentuserid) || (currentusername && singlepost.username && singlepost.username === currentusername);
+
                     const postcard = document.createElement('div');
                     postcard.className = 'postcard';
-                    postcard.innerHTML = '<div class="postmeta"><div class="postavatar">' + authorinitial + '</div><span class="postauthor">' + postauthorname + '</span><span class="postdate">' + datestring + '</span></div><div class="postbody"></div>';
+                    postcard.innerHTML = '<div class="postmeta"><div class="postauthorinfo"><div class="postavatar">' + authorinitial + '</div><span class="postauthor">' + postauthorname + '</span><span class="postdate">' + datestring + '</span></div>' + (isauthor ? '<button class="deletepostbutton" title="Delete post">Delete</button>' : '') + '</div><div class="postbody"></div>';
                     postcard.querySelector('.postbody').textContent = singlepost.content;
+
+                    if (isauthor) {
+                        const deletebutton = postcard.querySelector('.deletepostbutton');
+                        if (deletebutton) {
+                            deletebutton.onclick = async () => {
+                                if (!confirm('delete this post?')) return;
+                                const currenttoken = localStorage.getItem('accesstoken');
+                                const deleteresponse = await fetch(apiurl + '/posts?id=' + encodeURIComponent(singlepost.id), {
+                                    method: 'DELETE',
+                                    headers: {
+                                        'authorization': 'Bearer ' + currenttoken
+                                    }
+                                });
+                                if (deleteresponse.ok) {
+                                    postcard.remove();
+                                    if (feedcontainer.children.length === 0) {
+                                        const emptybox = document.createElement('div');
+                                        emptybox.className = 'emptystate';
+                                        emptybox.innerText = 'no posts yet. be the first to share something!';
+                                        feedcontainer.appendChild(emptybox);
+                                    }
+                                } else {
+                                    const deleteerror = await deleteresponse.json().catch(() => ({}));
+                                    alert(deleteerror.error || 'failed to delete post');
+                                }
+                            };
+                        }
+                    }
+
                     feedcontainer.appendChild(postcard);
                 }
             }

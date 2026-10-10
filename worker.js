@@ -2,7 +2,7 @@ export default {
     async fetch(incomingrequest, env) {
         const corsheaders = {
             'access-control-allow-origin': '*',
-            'access-control-allow-methods': 'POST, GET, OPTIONS',
+            'access-control-allow-methods': 'POST, GET, DELETE, OPTIONS',
             'access-control-allow-headers': 'content-type, authorization'
         };
 
@@ -105,6 +105,106 @@ export default {
 
                 return new Response(JSON.stringify(responsedata), {
                     status: 201,
+                    headers: { ...corsheaders, 'content-type': 'application/json' }
+                });
+            }
+
+            if (incomingrequest.method === 'DELETE') {
+                const requestparams = requesturl.searchParams;
+                let postid = requestparams.get('id');
+                if (!postid) {
+                    try {
+                        const requestbody = await incomingrequest.json();
+                        postid = requestbody.id;
+                    } catch (bodyparseerror) { }
+                }
+
+                if (!postid) {
+                    return new Response(JSON.stringify({ error: 'missing post id' }), {
+                        status: 400,
+                        headers: { ...corsheaders, 'content-type': 'application/json' }
+                    });
+                }
+
+                const userauth = incomingrequest.headers.get('authorization') || '';
+                let callerid = '';
+                let callerusername = '';
+
+                if (userauth.includes('Bearer ')) {
+                    try {
+                        const tokenparts = userauth.replace('Bearer ', '').trim().split('.');
+                        if (tokenparts.length === 3) {
+                            const tokendata = JSON.parse(atob(tokenparts[1]));
+                            callerid = tokendata.sub || '';
+                            callerusername = tokendata.user_metadata?.username || tokendata.user_metadata?.preferred_username || '';
+                        }
+                    } catch (tokenparseerror) { }
+                }
+
+                if (!callerid && !callerusername) {
+                    return new Response(JSON.stringify({ error: 'unauthorized' }), {
+                        status: 401,
+                        headers: { ...corsheaders, 'content-type': 'application/json' }
+                    });
+                }
+
+                const postcheckresponse = await fetch(supabaseurl + '/rest/v1/posts?id=eq.' + encodeURIComponent(postid), {
+                    headers: {
+                        'apikey': supabasekey,
+                        'authorization': 'Bearer ' + supabasekey
+                    }
+                });
+
+                const postrecords = await postcheckresponse.json();
+                if (!postcheckresponse.ok || !postrecords || postrecords.length === 0) {
+                    return new Response(JSON.stringify({ error: 'post not found' }), {
+                        status: 404,
+                        headers: { ...corsheaders, 'content-type': 'application/json' }
+                    });
+                }
+
+                const targetpost = postrecords[0];
+                const isowner = (callerid && targetpost.user_id && targetpost.user_id === callerid) || (callerusername && targetpost.username && targetpost.username === callerusername);
+
+                if (!isowner) {
+                    return new Response(JSON.stringify({ error: 'not authorized to delete this post' }), {
+                        status: 403,
+                        headers: { ...corsheaders, 'content-type': 'application/json' }
+                    });
+                }
+
+                let supabaseresponse = await fetch(supabaseurl + '/rest/v1/posts?id=eq.' + encodeURIComponent(postid), {
+                    method: 'DELETE',
+                    headers: {
+                        'apikey': supabasekey,
+                        'authorization': userauth,
+                        'prefer': 'return=representation'
+                    }
+                });
+
+                let deletedrecords = await supabaseresponse.json().catch(() => []);
+
+                if (!supabaseresponse.ok || !deletedrecords || deletedrecords.length === 0) {
+                    supabaseresponse = await fetch(supabaseurl + '/rest/v1/posts?id=eq.' + encodeURIComponent(postid), {
+                        method: 'DELETE',
+                        headers: {
+                            'apikey': supabasekey,
+                            'authorization': 'Bearer ' + supabasekey,
+                            'prefer': 'return=representation'
+                        }
+                    });
+                    deletedrecords = await supabaseresponse.json().catch(() => []);
+                }
+
+                if (!supabaseresponse.ok || !deletedrecords || deletedrecords.length === 0) {
+                    return new Response(JSON.stringify({ error: 'failed to delete post in database. please run supabase delete policy.' }), {
+                        status: 500,
+                        headers: { ...corsheaders, 'content-type': 'application/json' }
+                    });
+                }
+
+                return new Response(JSON.stringify({ success: true }), {
+                    status: 200,
                     headers: { ...corsheaders, 'content-type': 'application/json' }
                 });
             }
